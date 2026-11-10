@@ -36,7 +36,7 @@
     <string name="introduction_line_2">FFmpeg library used is ffmpeg-kit-next by arthenica <a href="https://github.com/arthenica/ffmpeg-kit-next">github</a></string>
 
     <string name="select_file_button" tools:ignore="MissingTranslation">Select photos &amp; videos</string>
-    <string name="browse_files_button" tools:ignore="MissingTranslation">Browse files: audio, or more than %1$d at once</string>
+    <string name="browse_files_button" tools:ignore="MissingTranslation">Browse files · audio or %1$d+ at once</string>
 
     <string name="ffmpeg_command">ffmpeg command running:</string>
     <string name="input_file">Input file:</string>
