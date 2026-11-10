@@ -2,10 +2,8 @@ package com.caydey.ffshare
 
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
-import android.provider.MediaStore
 import android.text.method.LinkMovementMethod
 import android.view.Menu
 import android.view.MenuItem
@@ -13,9 +11,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.MarginPageTransformer
@@ -41,11 +37,8 @@ class MainActivity : AppCompatActivity() {
     // true while the photo format buttons are set from code
     private var updatingPhotoFormat = false
 
-    // photos and videos together, in the system photo picker
-    private val mediaPickerLauncher = registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(pickerLimit)) {
-        compress(it)
-    }
-    // the files app: no limit on how many, and audio too
+    // the files app, no limit on how many (the photo picker stops at 100). the main button shows only
+    // photos and videos, "browse files" adds audio
     private val selectedFileLauncher = registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) {
         compress(it)
     }
@@ -80,9 +73,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnSelectFile.setOnClickListener {
-            mediaPickerLauncher.launch(PickVisualMediaRequest(PickVisualMedia.ImageAndVideo))
+            selectedFileLauncher.launch(arrayOf("image/*", "video/*"))
         }
-        binding.btnBrowseFiles.text = getString(R.string.browse_files_button, pickerLimit)
         binding.btnBrowseFiles.setOnClickListener {
             selectedFileLauncher.launch(utils.getAllowedMimes())
         }
@@ -308,9 +300,4 @@ class MainActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    companion object {
-        // how many files the photo picker hands over at once (usually 100), bigger batches use "Browse files"
-        private val pickerLimit: Int
-            get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) MediaStore.getPickImagesMaxLimit() else 100
-    }
 }

@@ -288,6 +288,7 @@
     <!-- the photo picker has a per-pick limit and shows no audio, the files app has neither problem -->
     <Button
         android:id="@+id/btnBrowseFiles"
+        android:text="@string/browse_files_button"
         style="@style/Widget.Nothing.Button.Text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
