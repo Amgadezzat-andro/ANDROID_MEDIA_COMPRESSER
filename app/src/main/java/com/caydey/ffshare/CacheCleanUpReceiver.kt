@@ -19,6 +19,12 @@ class CacheCleanUpReceiver: BroadcastReceiver() {
             UUID/UUID.jpg
          */
 
+        // a long video can take over an hour, don't delete the file it's writing
+        if (CompressionService.isRunning) {
+            Timber.d("Compression running, skipping cache cleanup")
+            return
+        }
+
         Timber.d("Cleaning up cache")
 
         val mediaDir = File(context.cacheDir, "media")

@@ -10,4 +10,14 @@
 
     <color name="light_grey">#DCDCDC</color>
     <color name="dark_grey">#696969</color>
+
+    <!-- monochrome theme roles, values-night/colors.xml swaps them for dark mode -->
+    <color name="mono_background">#F2F2F2</color>
+    <color name="mono_surface">#FFFFFF</color>
+    <color name="mono_primary">#000000</color>
+    <color name="mono_on_primary">#FFFFFF</color>
+    <color name="mono_text">#000000</color>
+    <color name="mono_text_secondary">#666666</color>
+    <!-- the one accent colour: savings numbers and progress -->
+    <color name="mono_accent">#E5383B</color>
 </resources>

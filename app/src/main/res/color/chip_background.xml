@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- selected quality chip is solid black (white in dark mode), the rest a light tint -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/mono_primary" android:state_checked="true" />
+    <item android:alpha="0.08" android:color="@color/mono_text" />
+</selector>

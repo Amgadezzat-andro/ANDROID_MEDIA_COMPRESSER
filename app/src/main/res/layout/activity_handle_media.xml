@@ -1,188 +1,388 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- progress while compressing, then the results page in the same screen -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/lblFfmpegCommand"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/ffmpeg_command"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/txtFfmpegCommand"
-        app:layout_constraintEnd_toEndOf="@+id/txtFfmpegCommand"
-        app:layout_constraintStart_toStartOf="@+id/txtFfmpegCommand" />
+    <!-- ================= progress ================= -->
+    <ScrollView
+        android:id="@+id/progressContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
-    <TextView
-        android:id="@+id/txtFfmpegCommand"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
-        android:breakStrategy="simple"
-        android:fontFamily="monospace"
-        android:hyphenationFrequency="none"
-        app:layout_constraintBottom_toTopOf="@+id/tableLayout2"
-        app:layout_constraintEnd_toEndOf="@+id/tableLayout2"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="@+id/tableLayout2" />
-
-    <TableLayout
-        android:id="@+id/tableLayout2"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="32dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <TableRow
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="24dp">
 
             <TextView
-                android:id="@+id/lblInputFile"
-                android:layout_width="80dp"
+                android:id="@+id/txtCommandNumber"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/input_file"
+                android:layout_marginTop="32dp"
+                android:text="@string/progress_starting"
+                android:textSize="28sp"
                 android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/txtInputFile"
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/progressBar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:breakStrategy="simple" />
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:id="@+id/lblInputFileSize"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/input_file_size"
-                android:textStyle="bold" />
+                android:layout_marginTop="16dp"
+                android:indeterminate="true"
+                android:max="1000"
+                app:indicatorColor="?attr/colorSecondary"
+                app:trackCornerRadius="4dp"
+                app:trackThickness="8dp" />
 
             <TextView
-                android:id="@+id/txtInputFileSize"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:id="@+id/lblOutputFile"
+                android:id="@+id/txtEta"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="@string/output_file"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="16sp" />
+
+            <!-- live "saved so far" line, filled in by MediaCompressor -->
+            <TextView
+                android:id="@+id/txtSavings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:textAlignment="center"
+                android:textColor="?attr/colorSecondary"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:layout_marginTop="24dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
+
+                <ImageView
+                    android:id="@+id/imgThumbnail"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/progress_thumbnail"
+                    android:scaleType="centerCrop" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnBackground"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/progress_background" />
+
+                <Button
+                    android:id="@+id/btnCancel"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/cancel_ffmpeg" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/lblDetailsToggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:background="?attr/selectableItemBackground"
+                android:padding="8dp"
+                android:text="@string/progress_details_show"
+                android:textColor="?android:attr/textColorSecondary" />
+
+            <!-- technical details, hidden unless asked for -->
+            <LinearLayout
+                android:id="@+id/detailsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/lblFfmpegCommand"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ffmpeg_command"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtFfmpegCommand"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:breakStrategy="simple"
+                    android:fontFamily="monospace"
+                    android:hyphenationFrequency="none"
+                    android:textSize="12sp" />
+
+                <TableLayout
+                    android:id="@+id/tableLayout2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TableRow>
+
+                        <TextView
+                            android:id="@+id/lblInputFile"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
+                            android:text="@string/input_file"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/txtInputFile"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:breakStrategy="simple" />
+                    </TableRow>
+
+                    <TableRow>
+
+                        <TextView
+                            android:id="@+id/lblInputFileSize"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/input_file_size"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/txtInputFileSize"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1" />
+                    </TableRow>
+
+                    <TableRow>
+
+                        <TextView
+                            android:id="@+id/lblOutputFile"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/output_file"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/txtOutputFile"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:layout_weight="1"
+                            android:breakStrategy="simple"
+                            android:hyphenationFrequency="none" />
+                    </TableRow>
+
+                    <TableRow>
+
+                        <TextView
+                            android:id="@+id/lblOutputFileSize"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/output_file_size"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/txtOutputFileSize"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1" />
+                    </TableRow>
+
+                    <TableRow android:id="@+id/processedTableRow">
+
+                        <TextView
+                            android:id="@+id/lblProcessed"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/processed"
+                            android:textStyle="bold" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:layout_weight="1"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/txtProcessedTime"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="4dp"
+                                android:layout_marginEnd="4dp"
+                                android:text="@string/x_of_x" />
+
+                            <TextView
+                                android:id="@+id/txtProcessedTimeTotal"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+
+                            <TextView
+                                android:id="@+id/txtProcessedPercent"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="4dp" />
+                        </LinearLayout>
+                    </TableRow>
+                </TableLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- ================= results ================= -->
+    <ScrollView
+        android:id="@+id/resultContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <TextView
+                android:id="@+id/txtResultTitle"
+                style="@style/TextAppearance.FFShare.BigNumber"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp" />
+
+            <TextView
+                android:id="@+id/txtResultSummary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textSize="16sp" />
+
+            <!-- before / after bars -->
+            <TextView
+                android:id="@+id/lblBefore"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:textColor="?android:attr/textColorSecondary" />
+
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/barBefore"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:max="1000"
+                android:progress="1000"
+                app:indicatorColor="?android:attr/textColorSecondary"
+                app:trackCornerRadius="4dp"
+                app:trackThickness="12dp" />
+
+            <TextView
+                android:id="@+id/lblAfter"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:textColor="?android:attr/textColorSecondary" />
+
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/barAfter"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:max="1000"
+                app:indicatorColor="?attr/colorSecondary"
+                app:trackCornerRadius="4dp"
+                app:trackThickness="12dp" />
+
+            <TextView
+                android:id="@+id/txtResultNotes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:textColor="?android:attr/textColorSecondary" />
+
+            <Button
+                android:id="@+id/btnShowFailed"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/result_see_failed"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/lblBiggestSavings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/result_biggest_savings"
+                android:textSize="18sp"
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/txtOutputFile"
+                android:id="@+id/txtBiggestSavings"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:layout_weight="1"
-                android:breakStrategy="simple"
-                android:hyphenationFrequency="none"
-                android:textAlignment="viewStart" />
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+                android:lineSpacingExtra="6dp" />
 
             <TextView
-                android:id="@+id/lblOutputFileSize"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/output_file_size"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/txtOutputFileSize"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/processedTableRow"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:id="@+id/lblProcessed"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@string/processed"
-                android:textStyle="bold" />
-
-            <TableRow
+                android:id="@+id/txtTrashInfo"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="16dp"
-                android:layout_weight="1">
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp" />
 
-                <TextView
-                    android:id="@+id/txtProcessedTime"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+            <Button
+                android:id="@+id/btnTrash"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:layout_marginTop="12dp"
+                android:textSize="16sp"
+                app:cornerRadius="12dp" />
 
-                <TextView
-                    android:id="@+id/textView19"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:layout_marginEnd="4dp"
-                    android:text="@string/x_of_x" />
+            <Button
+                android:id="@+id/btnUndoTrash"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/result_undo"
+                android:visibility="gone" />
 
-                <TextView
-                    android:id="@+id/txtProcessedTimeTotal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+            <Button
+                android:id="@+id/btnOpenFolder"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/result_open_folder" />
 
-                <TextView
-                    android:id="@+id/txtProcessedPercent"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp" />
-            </TableRow>
-
-        </TableRow>
-
-    </TableLayout>
-
-    <Button
-        android:id="@+id/btnCancel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="@string/cancel_ffmpeg"
-        app:layout_constraintEnd_toEndOf="@+id/tableLayout2"
-        app:layout_constraintStart_toStartOf="@+id/tableLayout2"
-        app:layout_constraintTop_toBottomOf="@+id/tableLayout2" />
-
-    <TextView
-        android:id="@+id/txtCommandNumber"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/lblFfmpegCommand"
-        app:layout_constraintEnd_toEndOf="@+id/lblFfmpegCommand"
-        app:layout_constraintStart_toStartOf="@+id/lblFfmpegCommand" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <Button
+                android:id="@+id/btnDone"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/result_done" />
+        </LinearLayout>
+    </ScrollView>
+</FrameLayout>

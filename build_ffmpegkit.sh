@@ -18,7 +18,8 @@ git clone --branch $FFMPEG_KIT_TAG_VERSION --depth=1 "https://github.com/artheni
 cd ffmpeg-kit-next
 ./nix-android.sh -p android-r27d \
   --jobs=$(nproc) \
-  --disable-x86 --disable-x86-64 --disable-arm-v7a-neon \
+  --disable-x86 --disable-x86-64 --disable-arm-v7a --disable-arm-v7a-neon \
+  --enable-android-media-codec \
   --enable-dav1d \
   --enable-fontconfig \
   --enable-freetype \

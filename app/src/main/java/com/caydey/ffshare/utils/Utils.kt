@@ -14,6 +14,7 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.core.content.ContextCompat
 import com.caydey.ffshare.BuildConfig
+import com.caydey.ffshare.R
 import timber.log.Timber
 import java.io.InputStream
 import kotlin.math.ln
@@ -69,7 +70,12 @@ class Utils(private val context: Context) {
     }
     fun getFilenameFromUri(uri: Uri): String? {
         var filename: String? = null
-        val queryCursor = context.contentResolver.query(uri, null, null, null, null)
+        // used when reporting failures, so it must not throw itself
+        val queryCursor = try {
+            context.contentResolver.query(uri, null, null, null, null)
+        } catch (e: Exception) {
+            null
+        }
         queryCursor?.let { cursor ->
             if (cursor.moveToFirst()) {
                 val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
@@ -80,6 +86,18 @@ class Utils(private val context: Context) {
             cursor.close()
         }
         return filename
+    }
+    fun getFileSizeFromUri(uri: Uri): Long {
+        try {
+            context.contentResolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst() && !cursor.isNull(0)) {
+                    return cursor.getLong(0)
+                }
+            }
+        } catch (e: Exception) {
+            Timber.d("Unable to get size of '%s'", uri)
+        }
+        return 0
     }
 
     val isReadPermissionGranted: Boolean
@@ -177,8 +195,10 @@ class Utils(private val context: Context) {
     fun getMediaResolution(mediaUri: Uri, mediaType: MediaType): Pair<Int,Int> {
         // image
         if (isImage(mediaType)) {
-            val bitmapOption = BitmapFactory.decodeStream(context.contentResolver.openInputStream(mediaUri)!!)
-            return Pair(bitmapOption.width, bitmapOption.height)
+            // only read the header, decoding the whole bitmap is slow and memory heavy
+            val bitmapOptions = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            context.contentResolver.openInputStream(mediaUri)?.use { BitmapFactory.decodeStream(it, null, bitmapOptions) }
+            return Pair(maxOf(bitmapOptions.outWidth, 0), maxOf(bitmapOptions.outHeight, 0))
         }
         // video
         // attempt to get video resolution
@@ -197,14 +217,24 @@ class Utils(private val context: Context) {
 
     fun bytesToHuman(bytes: Long): String {
         // warning will break for files over 1 petabyte in size
-        val units = arrayOf("B", "KiB", "MiB", "GiB", "TiB")
-        val byte = 1024f
+        // decimal units, same as the phone's own storage screen
+        val units = arrayOf("B", "KB", "MB", "GB", "TB")
+        val byte = 1000f
         if (bytes >= byte) {
             val e = (ln(bytes.toDouble()) / ln(byte)).toInt()
             val humanUnits = bytes / byte.pow(e)
             return String.format("%.01f %s", humanUnits, units[e])
         }
         return "$bytes ${units[0]}"
+    }
+    // "About 25 min left", rounded the way people say it rather than exact
+    fun formatTimeLeft(millis: Long): String {
+        val minutes = (millis + 59_999) / 60_000 // round up, "about 1 min" beats "0 min"
+        return when {
+            millis < 60_000 -> context.getString(R.string.eta_under_minute)
+            minutes < 60 -> context.resources.getQuantityString(R.plurals.eta_minutes, minutes.toInt(), minutes.toInt())
+            else -> context.getString(R.string.eta_hours, (minutes / 60).toInt(), (minutes % 60).toInt())
+        }
     }
     fun millisToMicrowaveTime(millis: Int): String {
         var remainder = millis / 1_000

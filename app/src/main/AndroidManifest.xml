@@ -3,12 +3,17 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!-- keep compressing while the user is in another app or the screen is off -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="@string/app_label"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.FFShare"
@@ -40,10 +45,25 @@
                 android:value="com.caydey.ffshare.MainActivity" />
         </activity>
         <activity
+            android:name=".OnboardingActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FFShare.NoActionBar" />
+        <!-- own task so it can be sent to the background and brought back from the notification.
+             the share menu reaches it through the two aliases below -->
+        <activity
             android:name=".HandleMediaActivity"
             android:excludeFromRecents="true"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:taskAffinity="com.caydey.ffshare.compress"
+            android:theme="@style/Theme.FFShare.NoActionBar"
+            android:screenOrientation="portrait" />
+        <!-- share menu: "Compress & save" keeps files in the save folder -->
+        <activity-alias
+            android:name=".CompressAndSave"
             android:exported="true"
-            android:screenOrientation="portrait">
+            android:label="@string/share_target_save"
+            android:targetActivity=".HandleMediaActivity">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -58,16 +78,41 @@
                 <data android:mimeType="video/*" />
                 <data android:mimeType="audio/*" />
             </intent-filter>
-        </activity>
+        </activity-alias>
+        <!-- share menu: "Compress & share" sends the smaller files on, e.g. to WhatsApp -->
+        <activity-alias
+            android:name=".CompressAndShare"
+            android:exported="true"
+            android:label="@string/share_target_share"
+            android:targetActivity=".HandleMediaActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+                <data android:mimeType="video/*" />
+                <data android:mimeType="audio/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+                <data android:mimeType="video/*" />
+                <data android:mimeType="audio/*" />
+            </intent-filter>
+        </activity-alias>
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.caydey.ffshare.fileprovider"
+            android:authorities="${applicationId}.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/filepaths" />
         </provider>
+        <service
+            android:name=".CompressionService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
         <receiver
             android:name=".CacheCleanUpReceiver"
             android:enabled="true"

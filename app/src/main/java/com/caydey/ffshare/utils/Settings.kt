@@ -52,13 +52,103 @@ class Settings(private val context: Context) {
         }
     }
 
+    // one-tap presets, each one overwrites the compression settings below
+    enum class QualityPreset(val values: Map<String, String>) {
+        MAX_COMPRESSION(mapOf(
+            VIDEO_CODEC to VideoCodecOpts.H265.name,
+            VIDEO_CRF to "32",
+            COMPRESSION_PRESET to "slow",
+            MAX_VIDEO_RESOLUTION to "720",
+            CONVERT_IMAGE_OUTPUT to Utils.MediaType.WEBP.name,
+            WEBP_QUALITY to "60",
+            MAX_IMAGE_RESOLUTION to "1080"
+        )),
+        BALANCED(mapOf(
+            VIDEO_CODEC to VideoCodecOpts.H265.name,
+            VIDEO_CRF to "28",
+            COMPRESSION_PRESET to "medium",
+            MAX_VIDEO_RESOLUTION to "1080",
+            CONVERT_IMAGE_OUTPUT to Utils.MediaType.WEBP.name,
+            WEBP_QUALITY to "75",
+            MAX_IMAGE_RESOLUTION to "1440"
+        )),
+        HIGH_QUALITY(mapOf(
+            VIDEO_CODEC to VideoCodecOpts.H265.name,
+            VIDEO_CRF to "23",
+            COMPRESSION_PRESET to "medium",
+            MAX_VIDEO_RESOLUTION to "0",
+            CONVERT_IMAGE_OUTPUT to Utils.MediaType.UNKNOWN.name,
+            JPEG_QSCALE to "2",
+            MAX_IMAGE_RESOLUTION to "0"
+        )),
+        CUSTOM(emptyMap())
+    }
+
     private val preferences: SharedPreferences
         get() = PreferenceManager.getDefaultSharedPreferences(context)
+
+    var qualityPreset: QualityPreset
+        get() = QualityPreset.valueOf(preferences.getString(QUALITY_PRESET, QualityPreset.CUSTOM.name)!!)
+        set(value) = setPreference(QUALITY_PRESET, value.name)
+
+    val isQualityPresetSet: Boolean
+        get() = preferences.contains(QUALITY_PRESET)
+
+    fun applyQualityPreset(preset: QualityPreset) {
+        val editor = preferences.edit()
+        preset.values.forEach { (key, value) -> editor.putString(key, value) }
+        editor.putString(QUALITY_PRESET, preset.name)
+        editor.apply()
+    }
+
+    // SAF tree uri of the folder compressed files are saved to, empty means share instead
+    var saveFolderUri: String
+        get() = preferences.getString(SAVE_FOLDER_URI, "")!!
+        set(value) = setPreference(SAVE_FOLDER_URI, value)
+
+    // don't save a "compressed" file that came out bigger, the original stays where it is
+    var keepOriginalIfBigger: Boolean
+        get() = preferences.getBoolean(KEEP_ORIGINAL_IF_BIGGER, true)
+        set(value) = setPreference(KEEP_ORIGINAL_IF_BIGGER, value)
+
+    var onboardingDone: Boolean
+        get() = preferences.getBoolean(ONBOARDING_DONE, false)
+        set(value) = setPreference(ONBOARDING_DONE, value)
+
+    // settings screen shows only the basics until this is turned on
+    var showAdvancedSettings: Boolean
+        get() = preferences.getBoolean(SHOW_ADVANCED_SETTINGS, false)
+        set(value) = setPreference(SHOW_ADVANCED_SETTINGS, value)
+
+    // use the phone's video encoder, falls back to x264/x265 automatically if the phone can't
+    var hardwareVideo: Boolean
+        get() = preferences.getBoolean(HARDWARE_VIDEO, true)
+        set(value) = setPreference(HARDWARE_VIDEO, value)
+
+    // lifetime savings shown on the main screen
+    val statsFiles: Int
+        get() = preferences.getInt(STATS_FILES, 0)
+    val statsInputBytes: Long
+        get() = preferences.getLong(STATS_INPUT_BYTES, 0)
+    val statsOutputBytes: Long
+        get() = preferences.getLong(STATS_OUTPUT_BYTES, 0)
+
+    fun addToStats(inputBytes: Long, outputBytes: Long) {
+        preferences.edit()
+            .putInt(STATS_FILES, statsFiles + 1)
+            .putLong(STATS_INPUT_BYTES, statsInputBytes + inputBytes)
+            .putLong(STATS_OUTPUT_BYTES, statsOutputBytes + outputBytes)
+            .apply()
+    }
+
+    var webpQuality: Int
+        get() = preferences.getString(WEBP_QUALITY, "75")!!.toInt()
+        set(value) = setPreference(WEBP_QUALITY, value.toString())
 
     var compressedMediaName: CompressedMediaNameOpts
         get() {
             // 2nd param is the default value
-            val preferencesString = preferences.getString(COMPRESSED_MEDIA_NAME, CompressedMediaNameOpts.UUID.name)!!
+            val preferencesString = preferences.getString(COMPRESSED_MEDIA_NAME, CompressedMediaNameOpts.ORIGINAL.name)!!
             return CompressedMediaNameOpts.valueOf(preferencesString) // convert string to enum
         }
         set(value) = setPreference(COMPRESSED_MEDIA_NAME, value.toString())
@@ -115,7 +205,7 @@ class Settings(private val context: Context) {
         set(value) = setPreference(MAX_IMAGE_RESOLUTION, value.toString())
 
     var copyExifTags: Boolean
-        get() = preferences.getBoolean(COPY_EXIF_TAGS, false)
+        get() = preferences.getBoolean(COPY_EXIF_TAGS, true) // keeps date taken, otherwise galleries sort compressed photos as "today"
         set(value) = setPreference(COPY_EXIF_TAGS, value)
 
     var lastVersion: Int
@@ -123,7 +213,7 @@ class Settings(private val context: Context) {
         set(value) = setPreference(LAST_VERSION, value)
 
     var saveLogs: Boolean
-        get() = preferences.getBoolean(SAVE_LOGS, true)
+        get() = preferences.getBoolean(SAVE_LOGS, false) // matches the switch, logs of thousands of files waste storage
         set(value) = setPreference(SAVE_LOGS, value)
 
     var compressionPreset: String
@@ -189,5 +279,15 @@ class Settings(private val context: Context) {
         const val CUSTOM_VIDEO_PARAMS = "pref_custom_video_params"
         const val CUSTOM_IMAGE_PARAMS = "pref_custom_image_params"
         const val CUSTOM_AUDIO_PARAMS = "pref_custom_audio_params"
+        const val QUALITY_PRESET = "pref_quality_preset"
+        const val SAVE_FOLDER_URI = "pref_save_folder_uri"
+        const val WEBP_QUALITY = "pref_webp_quality"
+        const val KEEP_ORIGINAL_IF_BIGGER = "pref_keep_original_if_bigger"
+        const val HARDWARE_VIDEO = "pref_hardware_video"
+        const val ONBOARDING_DONE = "onboarding_done"
+        const val SHOW_ADVANCED_SETTINGS = "pref_show_advanced"
+        const val STATS_FILES = "stats_files"
+        const val STATS_INPUT_BYTES = "stats_input_bytes"
+        const val STATS_OUTPUT_BYTES = "stats_output_bytes"
     }
 }

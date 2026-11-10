@@ -42,7 +42,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="?attr/colorPrimary"
+            android:background="?android:attr/colorBackground"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             android:navigationIcon="?attr/homeAsUpIndicator"
             app:title="@string/menu_item_logs" >

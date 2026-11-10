@@ -113,12 +113,12 @@
     </string-array>
 
     <string-array name="settings_video_codec">
-        <item>Copy</item>
-        <item>Do not specify (let ffmpeg decide)</item>
-        <item>H.264</item>
-        <item>H.265/HEVC</item>
+        <item>Keep the original (no re-encoding)</item>
+        <item>Automatic</item>
+        <item>H.264 (plays everywhere)</item>
+        <item>H.265 / HEVC (half the size, recommended)</item>
         <item>VP9</item>
-        <item>MPEG-4</item>
+        <item>MPEG-4 (old)</item>
     </string-array>
     <string-array name="settings_video_codec_values">
         <item>COPY</item>
@@ -167,5 +167,104 @@
         <item>medium</item>
         <item>slow</item>
         <item>slower</item>
+    </string-array>
+
+    <!-- extended lists, kept separate so translated arrays above still line up -->
+    <string-array name="settings_max_resolution_ext" tools:ignore="MissingTranslation">
+        <item>360p</item>
+        <item>480p</item>
+        <item>720p (HD)</item>
+        <item>1080p (Full HD)</item>
+        <item>1440p (2K)</item>
+        <item>2160p (4K)</item>
+        <item>Original size</item>
+    </string-array>
+
+    <!-- plain-language lists for the settings screen, values are what ffmpeg gets -->
+    <string-array name="settings_video_crf_plain" tools:ignore="MissingTranslation">
+        <item>Highest, biggest files (18)</item>
+        <item>Very high (20)</item>
+        <item>High (23)</item>
+        <item>Good (26)</item>
+        <item>Balanced (28)</item>
+        <item>Small (30)</item>
+        <item>Smaller (32)</item>
+        <item>Smallest, visible loss (35)</item>
+    </string-array>
+    <string-array name="settings_video_crf_plain_values" translatable="false">
+        <item>18</item><item>20</item><item>23</item><item>26</item>
+        <item>28</item><item>30</item><item>32</item><item>35</item>
+    </string-array>
+
+    <string-array name="settings_jpeg_quality_plain" tools:ignore="MissingTranslation">
+        <item>Best</item>
+        <item>Very high</item>
+        <item>High</item>
+        <item>Good</item>
+        <item>Medium</item>
+        <item>Low</item>
+    </string-array>
+    <!-- ffmpeg qscale, lower is better -->
+    <string-array name="settings_jpeg_quality_plain_values" translatable="false">
+        <item>2</item><item>4</item><item>6</item><item>10</item><item>15</item><item>20</item>
+    </string-array>
+
+    <string-array name="settings_compression_preset_plain" tools:ignore="MissingTranslation">
+        <item>Fastest, biggest files</item>
+        <item>Very fast</item>
+        <item>Faster</item>
+        <item>Fast</item>
+        <item>Balanced</item>
+        <item>Slow, smaller files</item>
+        <item>Slower</item>
+        <item>Slowest, smallest files</item>
+    </string-array>
+
+    <string-array name="settings_image_format_plain" tools:ignore="MissingTranslation">
+        <item>Same as the original</item>
+        <item>JPEG (.jpeg)</item>
+        <item>JPEG (.jpg)</item>
+        <item>PNG (lossless, big)</item>
+        <item>GIF</item>
+        <item>WebP (smallest, recommended)</item>
+    </string-array>
+    <string-array name="settings_max_resolution_ext_values" translatable="false">
+        <item>360</item>
+        <item>480</item>
+        <item>720</item>
+        <item>1080</item>
+        <item>1440</item>
+        <item>2160</item>
+        <item>0</item>
+    </string-array>
+
+    <string-array name="settings_compression_preset_ext" translatable="false">
+        <item>ultrafast</item>
+        <item>veryfast</item>
+        <item>faster</item>
+        <item>fast</item>
+        <item>medium</item>
+        <item>slow</item>
+        <item>slower</item>
+        <item>veryslow</item>
+    </string-array>
+
+    <string-array name="settings_webp_quality" translatable="false">
+        <item>100</item><item>95</item><item>90</item><item>85</item><item>80</item>
+        <item>75</item><item>70</item><item>65</item><item>60</item><item>55</item>
+        <item>50</item><item>45</item><item>40</item><item>35</item><item>30</item>
+    </string-array>
+
+    <string-array name="settings_quality_preset" tools:ignore="MissingTranslation">
+        <item>@string/preset_max_compression</item>
+        <item>@string/preset_balanced</item>
+        <item>@string/preset_high_quality</item>
+        <item>@string/preset_custom</item>
+    </string-array>
+    <string-array name="settings_quality_preset_values" translatable="false">
+        <item>MAX_COMPRESSION</item>
+        <item>BALANCED</item>
+        <item>HIGH_QUALITY</item>
+        <item>CUSTOM</item>
     </string-array>
 </resources>

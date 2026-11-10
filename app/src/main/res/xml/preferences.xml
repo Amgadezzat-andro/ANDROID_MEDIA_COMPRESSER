@@ -1,19 +1,145 @@
 <?xml version="1.0" encoding="utf-8"?>
 
+<!-- Basics are always shown, the rest only after "Show advanced settings" (see PreferencesFragment) -->
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <SwitchPreference
-            android:key="pref_save_logs"
-            android:defaultValue="false"
-            android:title="@string/settings_save_logs"
-            android:summary="@string/settings_save_logs_summary" />
+
     <PreferenceCategory
-        android:key="prefs_output"
-        android:title="@string/settings_output_options_title">
+        android:key="prefs_basic"
+        android:title="@string/settings_basic_title">
+        <!-- picking a preset overwrites the advanced options, editing one of them switches to Custom -->
+        <ListPreference
+            android:key="pref_quality_preset"
+            android:defaultValue="CUSTOM"
+            android:summary="%s"
+            android:title="@string/settings_quality_preset"
+            android:entries="@array/settings_quality_preset"
+            android:entryValues="@array/settings_quality_preset_values" />
+        <SwitchPreference
+            android:key="pref_hardware_video"
+            android:defaultValue="true"
+            android:title="@string/settings_hardware_video"
+            android:summary="@string/settings_hardware_video_summary" />
+        <SwitchPreference
+            android:key="pref_copy_exif_tags"
+            android:defaultValue="true"
+            android:title="@string/settings_copy_exif_tags"
+            android:summary="@string/settings_copy_exif_tags_summary" />
+        <SwitchPreference
+            android:key="pref_keep_original_if_bigger"
+            android:defaultValue="true"
+            android:title="@string/settings_keep_original_if_bigger"
+            android:summary="@string/settings_keep_original_if_bigger_summary" />
+        <SwitchPreference
+            android:key="pref_show_status_messages"
+            android:defaultValue="true"
+            android:title="@string/settings_show_status_messages"
+            android:summary="@string/settings_show_status_messages_summary" />
+        <SwitchPreference
+            android:key="pref_show_advanced"
+            android:defaultValue="false"
+            android:title="@string/settings_show_advanced"
+            android:summary="@string/settings_show_advanced_summary" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="prefs_photos"
+        android:title="@string/settings_photos_title">
+        <ListPreference
+            android:key="pref_convert_image_output"
+            android:defaultValue="UNKNOWN"
+            android:summary="%s"
+            android:title="@string/settings_convert_image_output"
+            android:entries="@array/settings_image_format_plain"
+            android:entryValues="@array/settings_convert_image_output_values" />
+        <ListPreference
+            android:key="pref_webp_quality"
+            android:defaultValue="75"
+            android:summary="%s"
+            android:title="@string/settings_webp_quality"
+            android:entries="@array/settings_webp_quality"
+            android:entryValues="@array/settings_webp_quality" />
+        <ListPreference
+            android:key="pref_jpeg_qscale"
+            android:defaultValue="10"
+            android:summary="%s"
+            android:title="@string/settings_jpeg_qscale"
+            android:entries="@array/settings_jpeg_quality_plain"
+            android:entryValues="@array/settings_jpeg_quality_plain_values" />
+        <ListPreference
+            android:key="pref_max_image_resolution"
+            android:defaultValue="2160"
+            android:summary="%s"
+            android:title="@string/settings_max_image_resolution"
+            android:entries="@array/settings_max_resolution_ext"
+            android:entryValues="@array/settings_max_resolution_ext_values" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="prefs_videos"
+        android:title="@string/settings_videos_title">
+        <ListPreference
+            android:key="pref_video_codec"
+            android:defaultValue="DEFAULT"
+            android:summary="%s"
+            android:title="@string/settings_video_codec"
+            android:entries="@array/settings_video_codec"
+            android:entryValues="@array/settings_video_codec_values" />
+        <ListPreference
+            android:key="pref_video_crf"
+            android:defaultValue="23"
+            android:summary="%s"
+            android:title="@string/settings_video_crf"
+            android:entries="@array/settings_video_crf_plain"
+            android:entryValues="@array/settings_video_crf_plain_values" />
+        <ListPreference
+            android:key="pref_compression_preset"
+            android:defaultValue="medium"
+            android:summary="%s"
+            android:title="@string/settings_compression_preset"
+            android:entries="@array/settings_compression_preset_plain"
+            android:entryValues="@array/settings_compression_preset_ext" />
+        <ListPreference
+            android:key="pref_max_video_resolution"
+            android:defaultValue="1080"
+            android:summary="%s"
+            android:title="@string/settings_max_video_resolution"
+            android:entries="@array/settings_max_resolution_ext"
+            android:entryValues="@array/settings_max_resolution_ext_values" />
+        <ListPreference
+            android:key="pref_video_max_file_size"
+            android:defaultValue="0"
+            android:summary="%s"
+            android:title="@string/settings_video_max_file_size"
+            android:entries="@array/settings_video_max_file_size"
+            android:entryValues="@array/settings_video_max_file_size_values" />
+        <ListPreference
+            android:key="pref_convert_video_output"
+            android:defaultValue="UNKNOWN"
+            android:summary="%s"
+            android:title="@string/settings_convert_video_output"
+            android:entries="@array/settings_convert_video_output"
+            android:entryValues="@array/settings_convert_video_output_values" />
+        <ListPreference
+            android:key="pref_audio_codec"
+            android:defaultValue="DEFAULT"
+            android:summary="%s"
+            android:title="@string/settings_audio_codec"
+            android:entries="@array/settings_audio_codec"
+            android:entryValues="@array/settings_audio_codec_values" />
+        <SwitchPreference
+            android:key="pref_treat_gifs_as_videos"
+            android:defaultValue="false"
+            android:title="@string/settings_treat_gifs_as_videos" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="prefs_files"
+        android:title="@string/settings_files_title">
         <ListPreference
             android:key="pref_compressed_media_name"
-            android:defaultValue="UUID"
+            android:defaultValue="ORIGINAL"
             android:title="@string/settings_compressed_media_name"
-            android:summary="@string/settings_compressed_media_name_summary"
+            android:summary="%s"
             android:entries="@array/settings_compressed_media_name"
             android:entryValues="@array/settings_compressed_media_name_values" />
 
@@ -24,112 +150,13 @@
             android:title="@string/settings_compressed_media_custom_name"
             android:summary="@string/settings_compressed_media_custom_name_summary" />
 
-        <SwitchPreference
-            android:key="pref_copy_exif_tags"
-            android:defaultValue="false"
-            android:title="@string/settings_copy_exif_tags"
-            android:summary="@string/settings_copy_exif_tags_summary" />
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:key="prefs_conversions"
-        android:title="@string/settings_conversions_options_title">
-        <ListPreference
-            android:key="pref_convert_image_output"
-            android:defaultValue="UNKNOWN"
-            android:summary="%s"
-            android:title="@string/settings_convert_image_output"
-            android:entries="@array/settings_convert_image_output"
-            android:entryValues="@array/settings_convert_image_output_values"
-            />
-        <ListPreference
-            android:key="pref_convert_video_output"
-            android:defaultValue="UNKNOWN"
-            android:summary="%s"
-            android:title="@string/settings_convert_video_output"
-            android:entries="@array/settings_convert_video_output"
-            android:entryValues="@array/settings_convert_video_output_values"
-            />
         <ListPreference
             android:key="pref_convert_audio_output"
             android:defaultValue="UNKNOWN"
             android:summary="%s"
             android:title="@string/settings_convert_audio_output"
             android:entries="@array/settings_convert_audio_output"
-            android:entryValues="@array/settings_convert_audio_output_values"
-            />
-
-        <SwitchPreference
-            android:key="pref_treat_gifs_as_videos"
-            android:defaultValue="false"
-            android:title="@string/settings_treat_gifs_as_videos"
-            />
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:key="prefs_compression"
-        android:title="@string/settings_compression_options_title">
-        <ListPreference
-            android:key="pref_jpeg_qscale"
-            android:defaultValue="10"
-            android:title="@string/settings_jpeg_qscale"
-            android:summary="@string/settings_jpeg_qscale_summary"
-            android:entries="@array/settings_jpeg_qscale"
-            android:entryValues="@array/settings_jpeg_qscale" />
-        <ListPreference
-            android:key="pref_video_crf"
-            android:defaultValue="23"
-            android:title="@string/settings_video_crf"
-            android:summary="@string/settings_video_crf_summary"
-            android:entries="@array/settings_video_crf"
-            android:entryValues="@array/settings_video_crf" />
-
-        <ListPreference
-            android:key="pref_compression_preset"
-            android:defaultValue="medium"
-            android:title="@string/settings_compression_preset"
-            android:summary="@string/settings_compression_preset_summary"
-            android:entries="@array/settings_compression_preset"
-            android:entryValues="@array/settings_compression_preset" />
-
-        <ListPreference
-            android:key="pref_video_max_file_size"
-            android:defaultValue="0"
-            android:title="@string/settings_video_max_file_size"
-            android:summary="@string/settings_video_max_file_size_summary"
-            android:entries="@array/settings_video_max_file_size"
-            android:entryValues="@array/settings_video_max_file_size_values" />
-
-        <ListPreference
-            android:key="pref_video_codec"
-            android:defaultValue="DEFAULT"
-            android:summary="%s"
-            android:title="@string/settings_video_codec"
-            android:entries="@array/settings_video_codec"
-            android:entryValues="@array/settings_video_codec_values" />
-
-        <ListPreference
-            android:key="pref_audio_codec"
-            android:defaultValue="DEFAULT"
-            android:summary="%s"
-            android:title="@string/settings_audio_codec"
-            android:entries="@array/settings_audio_codec"
-            android:entryValues="@array/settings_audio_codec_values" />
-
-        <ListPreference
-            android:key="pref_max_video_resolution"
-            android:defaultValue="1080"
-            android:title="@string/settings_max_video_resolution"
-            android:summary="@string/settings_max_video_resolution_summary"
-            android:entries="@array/settings_max_resolution"
-            android:entryValues="@array/settings_max_resolution_values" />
-        <ListPreference
-            android:key="pref_max_image_resolution"
-            android:defaultValue="2160"
-            android:title="@string/settings_max_image_resolution"
-            android:summary="@string/settings_max_image_resolution_summary"
-            android:entries="@array/settings_max_resolution"
-            android:entryValues="@array/settings_max_resolution_values" />
+            android:entryValues="@array/settings_convert_audio_output_values" />
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -149,16 +176,11 @@
             android:key="pref_custom_audio_params"
             android:defaultValue=""
             android:title="@string/settings_custom_audio_params" />
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:key="prefs_interface"
-        android:title="@string/settings_interface_options_title">
         <SwitchPreference
-            android:key="pref_show_toast_messages"
-            android:defaultValue="true"
-            android:title="@string/settings_show_status_messages"
-            android:summary="@string/settings_show_status_messages_summary" />
+            android:key="pref_save_logs"
+            android:defaultValue="false"
+            android:title="@string/settings_save_logs"
+            android:summary="@string/settings_save_logs_summary" />
     </PreferenceCategory>
 
 </PreferenceScreen>

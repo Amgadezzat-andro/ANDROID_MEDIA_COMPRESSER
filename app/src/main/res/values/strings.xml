@@ -1,5 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">FFShare</string>
+    <!-- launcher and title name, different from the original FFShare so both can sit side by side -->
+    <string name="app_label" translatable="false">FFShare+</string>
+    <string name="error_cannot_read" tools:ignore="MissingTranslation">Couldn\'t open this file. It may be cloud-only or no longer exist</string>
     <string name="menu_item_settings">Settings</string>
     <string name="menu_item_logs">Logs</string>
     <string name="menu_item_delete_logs">Delete all Logs</string>
@@ -32,7 +35,7 @@
     <string name="introduction_line_1">Functionality (and code) inspired by Scrambled-Exif by juanitobananas <a href="https://gitlab.com/juanitobananas/scrambled-exif">gitlab</a></string>
     <string name="introduction_line_2">FFmpeg library used is ffmpeg-kit-next by arthenica <a href="https://github.com/arthenica/ffmpeg-kit-next">github</a></string>
 
-    <string name="select_file_button" tools:ignore="MissingTranslation">Select file</string>
+    <string name="select_file_button" tools:ignore="MissingTranslation">Select files</string>
 
     <string name="ffmpeg_command">ffmpeg command running:</string>
     <string name="input_file">Input file:</string>
@@ -53,14 +56,14 @@
     <string name="logs_clear">Clear</string>
 
     <!-- Settings -->
-    <string name="settings_save_logs">Enable logs</string>
-    <string name="settings_save_logs_summary">Save all executed FFmpeg commands</string>
+    <string name="settings_save_logs">Keep a log of FFmpeg commands</string>
+    <string name="settings_save_logs_summary">For troubleshooting, shown under Logs</string>
 
     <string name="settings_compression_options_title">Compression options</string>
     <string name="settings_conversions_options_title">Conversion options</string>
     <string name="settings_output_options_title">Output Options</string>
 
-    <string name="settings_compressed_media_name">Compressed media name</string>
+    <string name="settings_compressed_media_name">File names</string>
     <string name="settings_compressed_media_name_summary">What to rename a compressed file to</string>
 
     <string name="settings_compressed_media_custom_name">Custom media name</string>
@@ -70,30 +73,30 @@
     <string name="settings_convert_audios_to_mp3">Convert all audio formats to mp3</string>
     <string name="settings_convert_images_to_jpg" tools:ignore="MissingTranslation">Convert all image formats to jpg</string>
 
-    <string name="settings_convert_image_output" tools:ignore="MissingTranslation">Image file output extension</string>
-    <string name="settings_convert_video_output" tools:ignore="MissingTranslation">Video file output extension</string>
-    <string name="settings_convert_audio_output" tools:ignore="MissingTranslation">Audio file output extension</string>
+    <string name="settings_convert_image_output" tools:ignore="MissingTranslation">Save photos as</string>
+    <string name="settings_convert_video_output" tools:ignore="MissingTranslation">Save videos as</string>
+    <string name="settings_convert_audio_output" tools:ignore="MissingTranslation">Save audio as</string>
     <string name="settings_treat_gifs_as_videos">Treat GIFs as videos</string>
 
-    <string name="settings_copy_exif_tags">Preserve Exif tags</string>
-    <string name="settings_copy_exif_tags_summary">Preserve Exif tags for output files</string>
+    <string name="settings_copy_exif_tags">Keep photo date and location</string>
+    <string name="settings_copy_exif_tags_summary">Compressed photos keep when and where they were taken, so your gallery stays in order</string>
 
-    <string name="settings_jpeg_qscale">JPEG image qscale</string>
+    <string name="settings_jpeg_qscale">JPEG quality</string>
     <string name="settings_jpeg_qscale_summary">Lower value will result in a larger file size with greater quality (default 10)</string>
 
-    <string name="settings_video_crf">Video crf</string>
+    <string name="settings_video_crf">Video quality</string>
     <string name="settings_video_crf_summary">(Constant Rate Factor) Lower value will result in a larger file size with greater quality (default 23)</string>
 
-    <string name="settings_video_max_file_size">Video max file size</string>
+    <string name="settings_video_max_file_size">Maximum video file size</string>
     <string name="settings_video_max_file_size_summary">Adjusts video bitrate to create an output less than the specified file size</string>
 
-    <string name="settings_max_video_resolution" tools:ignore="MissingTranslation">Max video resolution</string>
+    <string name="settings_max_video_resolution" tools:ignore="MissingTranslation">Maximum video size</string>
     <string name="settings_max_video_resolution_summary" tools:ignore="MissingTranslation">Reduce the video output resolution</string>
-    <string name="settings_max_image_resolution" tools:ignore="MissingTranslation">Max image resolution</string>
+    <string name="settings_max_image_resolution" tools:ignore="MissingTranslation">Maximum photo size</string>
     <string name="settings_max_image_resolution_summary" tools:ignore="MissingTranslation">Reduce the image output resolution</string>
 
-    <string name="settings_video_codec" tools:ignore="MissingTranslation">Video Codec</string>
-    <string name="settings_audio_codec" tools:ignore="MissingTranslation">Audio Codec</string>
+    <string name="settings_video_codec" tools:ignore="MissingTranslation">Video format</string>
+    <string name="settings_audio_codec" tools:ignore="MissingTranslation">Audio format</string>
 
     <string name="settings_custom_params_title" tools:ignore="MissingTranslation">Custom Parameters</string>
     <string name="settings_custom_params_summary" tools:ignore="MissingTranslation">If set, only these parameters will be used</string>
@@ -103,9 +106,134 @@
 
     <string name="settings_interface_options_title">Interface</string>
 
-    <string name="settings_show_status_messages">Show status messages</string>
-    <string name="settings_show_status_messages_summary">Show output file size in toast messages</string>
+    <string name="settings_show_status_messages">Show savings after sharing</string>
+    <string name="settings_show_status_messages_summary">A short message with the new size</string>
 
-    <string name="settings_compression_preset">FFmpeg compression preset</string>
+    <string name="settings_compression_preset">Encoding speed</string>
     <string name="settings_compression_preset_summary">Slower speed with a higher quality output or faster speed with a lower quality output</string>
+
+    <!-- Quality presets & save folder -->
+    <string name="quality_title" tools:ignore="MissingTranslation">Quality</string>
+    <string name="preset_max_compression" tools:ignore="MissingTranslation">Smallest</string>
+    <string name="preset_balanced" tools:ignore="MissingTranslation">Balanced</string>
+    <string name="preset_high_quality" tools:ignore="MissingTranslation">Best quality</string>
+    <string name="preset_custom" tools:ignore="MissingTranslation">Custom</string>
+    <string name="preset_max_compression_summary" tools:ignore="MissingTranslation">H.265 720p video · WebP 1080p images. Saves the most space</string>
+    <string name="preset_balanced_summary" tools:ignore="MissingTranslation">H.265 1080p video · WebP 1440p images. Recommended</string>
+    <string name="preset_high_quality_summary" tools:ignore="MissingTranslation">H.265 full resolution video · high quality original format images</string>
+    <string name="preset_custom_summary" tools:ignore="MissingTranslation">Your own settings from the Settings screen</string>
+
+    <string name="save_to_title" tools:ignore="MissingTranslation">Save to</string>
+    <string name="save_to_not_set" tools:ignore="MissingTranslation">No folder chosen. The share menu opens after compressing</string>
+    <string name="save_to_choose" tools:ignore="MissingTranslation">Choose folder</string>
+    <string name="save_to_clear" tools:ignore="MissingTranslation">Share instead</string>
+
+    <plurals name="files_failed_message" tools:ignore="MissingTranslation">
+        <item quantity="one">%d file couldn\'t be compressed</item>
+        <item quantity="other">%d files couldn\'t be compressed</item>
+    </plurals>
+
+    <!-- Savings -->
+    <string name="stats_title" tools:ignore="MissingTranslation">Your savings</string>
+    <string name="stats_saved" tools:ignore="MissingTranslation">%s saved</string>
+    <string name="stats_detail" tools:ignore="MissingTranslation">%1$,d files compressed · %2$.0f%% smaller on average</string>
+    <string name="stats_empty" tools:ignore="MissingTranslation">Nothing yet. Pick a quality, choose a folder, then select your photos and videos</string>
+    <string name="savings_live" tools:ignore="MissingTranslation">Saved so far: %s</string>
+    <string name="savings_live_estimate" tools:ignore="MissingTranslation">Saved so far: %1$s\nAbout %2$s when finished</string>
+
+    <string name="result_title" tools:ignore="MissingTranslation">Done! %s smaller</string>
+    <string name="result_title_nothing" tools:ignore="MissingTranslation">Nothing was compressed</string>
+    <string name="result_title_already_small" tools:ignore="MissingTranslation">Already as small as they get</string>
+    <plurals name="result_summary" tools:ignore="MissingTranslation">
+        <item quantity="one">%1$,d file · %2$.0f%% smaller</item>
+        <item quantity="other">%1$,d files · %2$.0f%% smaller</item>
+    </plurals>
+    <string name="result_before" tools:ignore="MissingTranslation">Before · %s</string>
+    <string name="result_after" tools:ignore="MissingTranslation">After · %s</string>
+    <string name="result_see_failed" tools:ignore="MissingTranslation">See which files failed</string>
+    <string name="result_failed_title" tools:ignore="MissingTranslation">Files that weren\'t compressed</string>
+    <string name="result_failed_line" tools:ignore="MissingTranslation">%1$s\n%2$s</string>
+    <string name="result_save_failed" tools:ignore="MissingTranslation">Couldn\'t save to the folder</string>
+    <string name="result_biggest_savings" tools:ignore="MissingTranslation">Biggest savings</string>
+    <string name="result_saving_line" tools:ignore="MissingTranslation">%1$s · %2$s → %3$s</string>
+    <string name="result_undo" tools:ignore="MissingTranslation">Undo, put the originals back</string>
+    <string name="result_restored" tools:ignore="MissingTranslation">Originals restored from the trash</string>
+    <string name="result_open_folder" tools:ignore="MissingTranslation">Open folder</string>
+    <string name="result_open_folder_failed" tools:ignore="MissingTranslation">No app on this phone can open the folder</string>
+    <string name="result_trash_failed" tools:ignore="MissingTranslation">Android didn\'t allow moving these to the trash. Delete them from your gallery instead</string>
+    <string name="stats_ready" tools:ignore="MissingTranslation">Ready to save space</string>
+    <string name="result_done" tools:ignore="MissingTranslation">Done</string>
+    <plurals name="result_kept_original" tools:ignore="MissingTranslation">
+        <item quantity="one">%d file was already small, the original was kept</item>
+        <item quantity="other">%d files were already small, the originals were kept</item>
+    </plurals>
+    <string name="result_trash_explain" tools:ignore="MissingTranslation">Your originals are still on your phone. Move them to the trash to actually free %s. The trash keeps them for 30 days in case you change your mind.</string>
+    <string name="result_not_trashable" tools:ignore="MissingTranslation">%d originals came from another app and must be deleted there</string>
+    <string name="result_trash_button" tools:ignore="MissingTranslation">Free up %s</string>
+    <string name="result_trashed" tools:ignore="MissingTranslation">Moved %1$d originals to trash. Freed %2$s</string>
+
+    <!-- Background compression -->
+    <string name="notification_channel" tools:ignore="MissingTranslation">Compression progress</string>
+    <string name="notification_title" tools:ignore="MissingTranslation">Compressing your files</string>
+    <string name="notification_starting" tools:ignore="MissingTranslation">Starting…</string>
+    <string name="notification_progress" tools:ignore="MissingTranslation">%1$,d of %2$,d · %3$s saved</string>
+    <string name="notification_done_title" tools:ignore="MissingTranslation">Done! %s smaller</string>
+    <plurals name="notification_done_text" tools:ignore="MissingTranslation">
+        <item quantity="one">%d file compressed. Tap to see the results</item>
+        <item quantity="other">%d files compressed. Tap to see the results</item>
+    </plurals>
+    <string name="notification_done_share" tools:ignore="MissingTranslation">Tap to share your compressed files</string>
+    <string name="already_compressing" tools:ignore="MissingTranslation">Already compressing. Wait for it to finish first</string>
+
+    <string name="settings_hardware_video" tools:ignore="MissingTranslation">Fast video (hardware encoder)</string>
+    <string name="settings_hardware_video_summary" tools:ignore="MissingTranslation">Uses your phone\'s video chip, many times faster. Falls back to normal encoding automatically if your phone doesn\'t support it</string>
+
+    <string name="settings_keep_original_if_bigger" tools:ignore="MissingTranslation">Keep original if compressing makes it bigger</string>
+    <string name="settings_keep_original_if_bigger_summary" tools:ignore="MissingTranslation">Already small files are left as they are instead of saving a bigger copy</string>
+
+    <string name="settings_quality_preset" tools:ignore="MissingTranslation">Quality</string>
+    <string name="settings_webp_quality" tools:ignore="MissingTranslation">WebP quality (higher looks better, bigger files)</string>
+    <string name="settings_basic_title" tools:ignore="MissingTranslation">Basics</string>
+    <string name="settings_photos_title" tools:ignore="MissingTranslation">Photos</string>
+    <string name="settings_videos_title" tools:ignore="MissingTranslation">Videos</string>
+    <string name="settings_files_title" tools:ignore="MissingTranslation">Files</string>
+    <string name="settings_show_advanced" tools:ignore="MissingTranslation">Show advanced settings</string>
+    <string name="settings_show_advanced_summary" tools:ignore="MissingTranslation">Formats, exact quality and FFmpeg options</string>
+
+    <!-- Share menu entries -->
+    <string name="share_target_save" tools:ignore="MissingTranslation">Compress &amp; save</string>
+    <string name="share_target_share" tools:ignore="MissingTranslation">Compress &amp; share</string>
+    <string name="choose_folder_first" tools:ignore="MissingTranslation">Pick a folder to save compressed files to</string>
+
+    <!-- Progress screen -->
+    <string name="progress_starting" tools:ignore="MissingTranslation">Getting ready…</string>
+    <string name="progress_single" tools:ignore="MissingTranslation">Compressing…</string>
+    <string name="progress_x_of_y" tools:ignore="MissingTranslation">%1$,d of %2$,d</string>
+    <string name="progress_thumbnail" tools:ignore="MissingTranslation">File being compressed</string>
+    <string name="progress_background" tools:ignore="MissingTranslation">Run in background</string>
+    <string name="progress_details_show" tools:ignore="MissingTranslation">Technical details ▾</string>
+    <string name="progress_details_hide" tools:ignore="MissingTranslation">Hide details ▴</string>
+    <string name="eta_estimating" tools:ignore="MissingTranslation">Working out time left…</string>
+    <string name="eta_under_minute" tools:ignore="MissingTranslation">Less than a minute left</string>
+    <plurals name="eta_minutes" tools:ignore="MissingTranslation">
+        <item quantity="one">About %d min left</item>
+        <item quantity="other">About %d min left</item>
+    </plurals>
+    <string name="eta_hours" tools:ignore="MissingTranslation">About %1$d h %2$d min left</string>
+
+    <!-- First-run setup -->
+    <string name="onboarding_step" tools:ignore="MissingTranslation">Step %1$d of %2$d</string>
+    <string name="onboarding_quality_title" tools:ignore="MissingTranslation">How small should your files be?</string>
+    <string name="onboarding_quality_hint" tools:ignore="MissingTranslation">You can change this any time on the main screen.</string>
+    <string name="onboarding_folder_title" tools:ignore="MissingTranslation">Where should compressed files go?</string>
+    <string name="onboarding_folder_body" tools:ignore="MissingTranslation">Pick or create a folder, for example Pictures/Compressed. Your originals stay where they are until you choose to move them to the trash.</string>
+    <string name="onboarding_folder_chosen" tools:ignore="MissingTranslation">Saving to %s</string>
+    <string name="onboarding_notifications_title" tools:ignore="MissingTranslation">Get told when it\'s done?</string>
+    <string name="onboarding_notifications_body" tools:ignore="MissingTranslation">Big batches can take a while. A notification shows the progress while you use other apps, and tells you how much space you saved at the end.</string>
+    <string name="onboarding_notifications_allow" tools:ignore="MissingTranslation">Allow notifications</string>
+    <string name="onboarding_next" tools:ignore="MissingTranslation">Next</string>
+    <string name="onboarding_back" tools:ignore="MissingTranslation">Back</string>
+    <string name="onboarding_done" tools:ignore="MissingTranslation">Done</string>
+    <string name="onboarding_not_now" tools:ignore="MissingTranslation">Not now</string>
+    <string name="onboarding_skip_folder" tools:ignore="MissingTranslation">Skip, use the share menu</string>
 </resources>

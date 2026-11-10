@@ -1,15 +1,23 @@
 <resources>
-    <!-- Base application theme. -->
-    <style name="Theme.FFShare" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/teal</item>
-        <item name="colorPrimaryVariant">@color/teal_darker</item>
-        <item name="colorOnPrimary">@color/black</item>
+    <!-- Base application theme, monochrome with one accent. Colours flip in values-night/colors.xml -->
+    <style name="Theme.FFShare" parent="Theme.MaterialComponents.DayNight">
+        <item name="colorPrimary">@color/mono_primary</item>
+        <item name="colorPrimaryVariant">@color/mono_primary</item>
+        <item name="colorOnPrimary">@color/mono_on_primary</item>
+        <item name="colorSecondary">@color/mono_accent</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSurface">@color/mono_surface</item>
+        <item name="colorOnSurface">@color/mono_text</item>
+        <item name="android:colorBackground">@color/mono_background</item>
 
-        <item name="android:textColor">@color/black</item>
+        <item name="android:textColor">@color/mono_text</item>
+        <item name="android:textColorSecondary">@color/mono_text_secondary</item>
 
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <!-- flat bars that blend with the background -->
+        <item name="actionBarStyle">@style/Widget.MaterialComponents.ActionBar.Surface</item>
+        <item name="actionBarTheme">@style/ThemeOverlay.MaterialComponents.ActionBar.Surface</item>
+        <item name="android:statusBarColor">@color/mono_background</item>
+        <item name="android:windowLightStatusBar">@bool/light_status_bar</item>
     </style>
 
     <style name="Button.Copy" parent="Theme.MaterialComponents.DayNight.DarkActionBar" >
@@ -22,7 +30,20 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="Theme.FFShare.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="Theme.FFShare.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Toolbar.Surface" />
 
-    <style name="Theme.FFShare.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="Theme.FFShare.PopupOverlay" parent="ThemeOverlay.AppCompat.DayNight" />
+
+    <!-- quality chips: selected one solid, see res/color/chip_*.xml -->
+    <style name="Widget.FFShare.Chip.Choice" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="chipBackgroundColor">@color/chip_background</item>
+        <item name="android:textColor">@color/chip_text</item>
+        <item name="checkedIconVisible">false</item>
+    </style>
+
+    <!-- big numbers like "6.3 GB saved" -->
+    <style name="TextAppearance.FFShare.BigNumber" parent="TextAppearance.MaterialComponents.Headline4">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/mono_accent</item>
+    </style>
 </resources>
