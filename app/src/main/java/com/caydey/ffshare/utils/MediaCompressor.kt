@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
@@ -33,6 +34,8 @@ import timber.log.Timber
 import java.io.File
 import java.util.*
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.concurrent.thread
@@ -80,7 +83,7 @@ class MediaCompressor(private val context: Context) {
         val txtProcessedTime: TextView = activity.findViewById(R.id.txtProcessedTime)
         val txtProcessedTimeTotal: TextView = activity.findViewById(R.id.txtProcessedTimeTotal)
         val txtProcessedPercent: TextView = activity.findViewById(R.id.txtProcessedPercent)
-        val processedTableRow: TableRow = activity.findViewById(R.id.processedTableRow)
+        val processedTableRow: View = activity.findViewById(R.id.processedTableRow)
 
         if (canceled) {
             failureHandler(context.getString(R.string.ffmpeg_canceled))
@@ -160,9 +163,16 @@ class MediaCompressor(private val context: Context) {
             txtProcessedPercent.text = context.getString(R.string.format_percentage, 0.0f)
         }
 
+        // set once by whichever ends this file first: ffmpeg finishing, or the watchdog giving up on a stalled encoder
+        val settled = AtomicBoolean(false)
+        val lastProgress = AtomicLong(SystemClock.elapsedRealtime())
+        // ffmpeg reports statistics twice a second even when no frame comes out, only real progress counts
+        val lastProgressMark = AtomicLong(-1)
+
         Timber.d("Executing ffmpeg command: 'ffmpeg %s'", command)
-        FFmpegKit.executeAsync(command, { session ->
+        val session = FFmpegKit.executeAsync(command, { session ->
             // completed
+            if (!settled.compareAndSet(false, true)) return@executeAsync // the watchdog already moved on
             localInput?.delete()
             if (session.getReturnCode()?.isValueSuccess() == false) { // failed
                 if (session.getReturnCode()?.isValueCancel() == true) {
@@ -194,7 +204,9 @@ class MediaCompressor(private val context: Context) {
                 if (settings.copyExifTags && ExifTools.isValidType(mediaType)) {
                     Timber.d("copying exif tags")
                     try {
-                        context.contentResolver.openInputStream(inputFileUri)?.use { ExifTools.copyExif(it, outputFile) }
+                        val size = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                        BitmapFactory.decodeFile(outputFile.absolutePath, size)
+                        context.contentResolver.openInputStream(inputFileUri)?.use { ExifTools.copyExif(it, outputFile, size.outWidth, size.outHeight) }
                     } catch (e: Exception) {
                         // a missing date isn't worth losing the compressed file over
                         Timber.e(e, "Unable to copy exif tags")
@@ -224,6 +236,8 @@ class MediaCompressor(private val context: Context) {
                 successHandler(outputFileUri, outputFile, inputFileSize, outputFileCurrentSize)
             }
         }, { /* logs */ }, { statistics ->
+            val mark = statistics.videoFrameNumber.toLong() + statistics.size
+            if (lastProgressMark.getAndSet(mark) != mark) lastProgress.set(SystemClock.elapsedRealtime())
             // update TextViews with stats
             mainHandler.post {
                 if (showProgress && duration > 0) { // only show time processed if video
@@ -236,6 +250,24 @@ class MediaCompressor(private val context: Context) {
                 fileProgressListener?.invoke((statistics.time.toFloat() / duration).coerceIn(0f, 1f))
             }
         })
+
+        // a hardware encoder can hang without an error (seen with mediacodec), ffmpeg then never finishes
+        // and can't even be canceled. give up on it and redo the file in software
+        if (usedHardware) {
+            thread(name = "stall-watchdog") {
+                while (!settled.get()) {
+                    Thread.sleep(STALL_CHECK_INTERVAL)
+                    if (SystemClock.elapsedRealtime() - lastProgress.get() < HARDWARE_STALL_TIMEOUT) continue
+                    if (settled.compareAndSet(false, true)) {
+                        Timber.w("hardware encoder stalled, retrying with software")
+                        session.cancel()
+                        hardwareVideoWorks = false
+                        outputFile.parentFile?.deleteRecursively()
+                        compressSingleFile(activity, inputFileUri, successHandler, failureHandler, useHardware = false)
+                    }
+                }
+            }
+        }
     }
 
     // everything that happened in a batch, used for the results screen
@@ -401,46 +433,75 @@ class MediaCompressor(private val context: Context) {
         }
 
         // ffmpeg encodes an image on roughly one core, so images run several at a time.
-        // videos already use every core (or the hardware encoder), so they run one at a time
+        // videos (and audio) read through saf, which breaks when two files use it at once, and already
+        // use every core or the hardware encoder, so they get one lane of their own that runs next to
+        // the image workers. once its videos are done that lane helps with the images.
         // off the main thread, checking thousands of files takes a moment
         thread(name = "compress-start") {
-            val hasVideos = inputFilesUri.any { context.contentResolver.getType(it)?.startsWith("video/") == true }
-            val workerCount = if (hasVideos || inputFilesCount == 1) 1 else (Runtime.getRuntime().availableProcessors() / 2).coerceIn(1, 4)
-            val nextIndex = AtomicInteger(0)
+            val (images, serial) = inputFilesUri.partition { isImage(it) }
+            val nextImage = AtomicInteger(0)
+            val nextSerial = AtomicInteger(0)
+            var imageWorkers = if (images.size <= 1) images.size else (Runtime.getRuntime().availableProcessors() / 2).coerceIn(1, 4)
+            if (serial.isNotEmpty() && !(settings.hardwareVideo && FFmpegParamMaker.hasHardwareEncoder(settings.videoCodec))) {
+                // software video already keeps every core busy
+                imageWorkers = (imageWorkers - 1).coerceAtLeast(if (images.isEmpty()) 0 else 1)
+            }
+            val serialWorkers = if (serial.isEmpty()) 0 else 1
+            val workerCount = imageWorkers + serialWorkers
             val runningWorkers = AtomicInteger(workerCount)
-            Timber.d("Compressing %d files with %d workers", inputFilesCount, workerCount)
+            Timber.d("Compressing %d images and %d videos/audio with %d image workers", images.size, serial.size, imageWorkers)
+
+            // null when this worker has nothing left to do
+            fun nextFile(serialLane: Boolean): Uri? {
+                if (serialLane) {
+                    val i = nextSerial.getAndIncrement()
+                    if (i < serial.size) return serial[i]
+                }
+                return images.getOrNull(nextImage.getAndIncrement())
+            }
 
             repeat(workerCount) { workerNumber ->
                 thread(name = "compress-worker-$workerNumber") {
+                    val serialLane = workerNumber < serialWorkers
                     while (!canceled) {
-                        val i = nextIndex.getAndIncrement()
-                        if (i >= inputFilesCount) break
-                        Timber.d("Processing %d of %d files", i+1, inputFilesCount)
+                        val originalUri = nextFile(serialLane) ?: break
+                        Timber.d("Processing '%s'", originalUri)
 
-                        val originalUri = inputFilesUri[i]
                         showThumbnail(originalUri)
                         val fileDone = CountDownLatch(1)
+                        // a file given up on after cancel may still report later, only its first outcome counts
+                        val settled = AtomicBoolean(false)
                         // one unreadable file (revoked permission, cloud-only, deleted) must not crash the
                         // whole app from a worker thread, it just counts as failed
                         try {
                             compressSingleFile(activity, originalUri, failureHandler = { reason ->
-                                onFailed(originalUri, reason)
+                                if (settled.compareAndSet(false, true)) onFailed(originalUri, reason)
                                 fileDone.countDown()
                             }, successHandler = { uri, outputFile, inputFileSize, outputFileSize ->
-                                try {
-                                    onCompressed(originalUri, uri, outputFile, inputFileSize, outputFileSize)
-                                } catch (e: Exception) {
-                                    Timber.e(e, "Unable to finish '%s'", originalUri)
-                                    onFailed(originalUri, context.getString(R.string.result_save_failed))
+                                if (settled.compareAndSet(false, true)) {
+                                    try {
+                                        onCompressed(originalUri, uri, outputFile, inputFileSize, outputFileSize)
+                                    } catch (e: Exception) {
+                                        Timber.e(e, "Unable to finish '%s'", originalUri)
+                                        onFailed(originalUri, context.getString(R.string.result_save_failed))
+                                    }
                                 }
                                 fileDone.countDown()
                             })
                         } catch (e: Exception) {
                             Timber.e(e, "Unable to compress '%s'", originalUri)
-                            onFailed(originalUri, context.getString(R.string.error_cannot_read))
+                            if (settled.compareAndSet(false, true)) onFailed(originalUri, context.getString(R.string.error_cannot_read))
                             fileDone.countDown()
                         }
-                        fileDone.await()
+                        // cancel must always end the batch, even when ffmpeg is stuck and never reports back
+                        var waitedAfterCancel = 0
+                        while (!fileDone.await(1, TimeUnit.SECONDS)) {
+                            if (canceled && ++waitedAfterCancel >= CANCEL_GRACE_SECONDS) {
+                                Timber.w("Giving up on '%s' after cancel", originalUri)
+                                if (settled.compareAndSet(false, true)) onFailed(originalUri, context.getString(R.string.ffmpeg_canceled))
+                                break
+                            }
+                        }
                         showProgress()
                     }
                     // last worker out reports the batch
@@ -468,6 +529,10 @@ class MediaCompressor(private val context: Context) {
         private const val THUMBNAIL_SIZE = 400
         // the first seconds are too noisy to estimate time left from
         private const val MIN_ETA_ELAPSED = 5_000L
+        // a hardware encoder that reports no progress for this long is stuck
+        private const val HARDWARE_STALL_TIMEOUT = 30_000L
+        private const val STALL_CHECK_INTERVAL = 2_000L
+        private const val CANCEL_GRACE_SECONDS = 5
     }
 
     private fun videoFrame(uri: Uri): Bitmap? {
@@ -479,6 +544,16 @@ class MediaCompressor(private val context: Context) {
             null
         } finally {
             retriever.release()
+        }
+    }
+
+    // the same split compressSingleFile makes: only images are read from a private copy, so only they
+    // may run in parallel. the mime type is quick, the file name/signature check is the fallback
+    private fun isImage(uri: Uri): Boolean {
+        val mime = context.contentResolver.getType(uri)
+        return when {
+            mime == null || mime == "application/octet-stream" -> utils.isImage(utils.getMediaType(uri))
+            else -> mime.startsWith("image/") && utils.isImage(utils.getMediaType(uri))
         }
     }
 

@@ -61,7 +61,14 @@ class OnboardingActivity : AppCompatActivity() {
             override fun handleOnBackPressed() = back()
         })
 
+        // rotating or dark mode recreates the screen, stay on the same step
+        savedInstanceState?.let { binding.flipper.displayedChild = it.getInt(STATE_STEP, 0) }
         updateStep()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt(STATE_STEP, binding.flipper.displayedChild)
     }
 
     private fun next() {
@@ -108,5 +115,9 @@ class OnboardingActivity : AppCompatActivity() {
         }
         settings.onboardingDone = true
         finish()
+    }
+
+    companion object {
+        private const val STATE_STEP = "step"
     }
 }

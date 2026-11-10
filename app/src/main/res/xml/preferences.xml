@@ -14,6 +14,14 @@
             android:title="@string/settings_quality_preset"
             android:entries="@array/settings_quality_preset"
             android:entryValues="@array/settings_quality_preset_values" />
+        <!-- not part of the presets, every preset has a quality for webp and for jpeg -->
+        <ListPreference
+            android:key="pref_convert_image_output"
+            android:defaultValue="WEBP"
+            android:summary="%s"
+            android:title="@string/settings_photo_format"
+            android:entries="@array/settings_image_format_plain"
+            android:entryValues="@array/settings_convert_image_output_values" />
         <SwitchPreference
             android:key="pref_hardware_video"
             android:defaultValue="true"
@@ -44,13 +52,6 @@
     <PreferenceCategory
         android:key="prefs_photos"
         android:title="@string/settings_photos_title">
-        <ListPreference
-            android:key="pref_convert_image_output"
-            android:defaultValue="UNKNOWN"
-            android:summary="%s"
-            android:title="@string/settings_convert_image_output"
-            android:entries="@array/settings_image_format_plain"
-            android:entryValues="@array/settings_convert_image_output_values" />
         <ListPreference
             android:key="pref_webp_quality"
             android:defaultValue="75"

@@ -1,6 +1,10 @@
 package com.caydey.ffshare.utils
 
+import android.media.MediaCodecInfo
+import android.media.MediaCodecList
+import android.media.MediaFormat
 import android.net.Uri
+import android.os.Build
 import com.arthenica.ffmpegkit.MediaInformation
 import timber.log.Timber
 import java.util.StringJoiner
@@ -20,7 +24,8 @@ class FFmpegParamMaker(val settings: Settings, val utils: Utils) {
 //        val (inputVideoCodec, inputAudioCodec) = getMediaCodecs(mediaInformation)
 
         // the phone's own video encoder, many times faster than x264/x265 but has no crf or preset
-        val hardwareEncoder = if (useHardware && utils.isVideo(outputMediaType) && outputMediaType != Utils.MediaType.WEBM) {
+        val hardwareEncoder = if (useHardware && utils.isVideo(outputMediaType) && outputMediaType != Utils.MediaType.WEBM &&
+            hasHardwareEncoder(settings.videoCodec)) {
             when (settings.videoCodec) {
                 Settings.VideoCodecOpts.H265 -> HEVC_HARDWARE_ENCODER
                 Settings.VideoCodecOpts.H264 -> H264_HARDWARE_ENCODER
@@ -203,6 +208,34 @@ class FFmpegParamMaker(val settings: Settings, val utils: Utils) {
     companion object {
         const val HEVC_HARDWARE_ENCODER = "hevc_mediacodec"
         const val H264_HARDWARE_ENCODER = "h264_mediacodec"
+
+        // emulators and some phones only have google's software codecs behind mediacodec. those are
+        // no faster than x265 and can stall without an error, so only real hardware encoders count
+        private val hardwareEncoderMimes: Set<String> by lazy {
+            try {
+                MediaCodecList(MediaCodecList.REGULAR_CODECS).codecInfos
+                    .filter { it.isEncoder && isHardware(it) }
+                    .flatMap { it.supportedTypes.map { type -> type.lowercase() } }
+                    .toSet()
+            } catch (e: Exception) {
+                Timber.e(e, "Unable to list video encoders")
+                emptySet()
+            }
+        }
+
+        private fun isHardware(info: MediaCodecInfo): Boolean {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                return info.isHardwareAccelerated && !info.isSoftwareOnly
+            }
+            val name = info.name.lowercase()
+            return !name.startsWith("omx.google.") && !name.startsWith("c2.android.")
+        }
+
+        fun hasHardwareEncoder(codec: Settings.VideoCodecOpts): Boolean = when (codec) {
+            Settings.VideoCodecOpts.H265 -> MediaFormat.MIMETYPE_VIDEO_HEVC in hardwareEncoderMimes
+            Settings.VideoCodecOpts.H264 -> MediaFormat.MIMETYPE_VIDEO_AVC in hardwareEncoderMimes
+            else -> false
+        }
     }
 
     private fun getMediaCodecs(mediaInformation: MediaInformation): Pair<Settings.VideoCodecOpts?, Settings.AudioCodecOpts?> {

@@ -11,4 +11,10 @@
         android:orderInCategory="200"
         android:title="@string/menu_item_settings"
         app:showAsAction="never" />
+    <!-- credits of the projects this is built on, they used to fill the bottom of the main screen -->
+    <item
+        android:id="@+id/action_about"
+        android:orderInCategory="300"
+        android:title="@string/action_about"
+        app:showAsAction="never" />
 </menu>

@@ -6,5 +6,5 @@
     <color name="mono_on_primary">#000000</color>
     <color name="mono_text">#FFFFFF</color>
     <color name="mono_text_secondary">#A0A0A0</color>
-    <color name="mono_accent">#FF5A5F</color>
+    <color name="mono_accent">#E8323C</color>
 </resources>

@@ -18,6 +18,6 @@
     <color name="mono_on_primary">#FFFFFF</color>
     <color name="mono_text">#000000</color>
     <color name="mono_text_secondary">#666666</color>
-    <!-- the one accent colour: savings numbers and progress -->
-    <color name="mono_accent">#E5383B</color>
+    <!-- the one accent colour, nothing red: savings numbers and progress -->
+    <color name="mono_accent">#D71921</color>
 </resources>

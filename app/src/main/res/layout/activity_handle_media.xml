@@ -2,6 +2,7 @@
 <!-- progress while compressing, then the results page in the same screen -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -25,8 +26,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
                 android:text="@string/progress_starting"
-                android:textSize="28sp"
-                android:textStyle="bold" />
+                android:textAppearance="@style/TextAppearance.Nothing.Display"
+                android:textSize="32sp" />
 
             <com.google.android.material.progressindicator.LinearProgressIndicator
                 android:id="@+id/progressBar"
@@ -61,9 +62,7 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="200dp"
                 android:layout_height="200dp"
-                android:layout_marginTop="24dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp">
+                android:layout_marginTop="24dp">
 
                 <ImageView
                     android:id="@+id/imgThumbnail"
@@ -81,14 +80,14 @@
 
                 <Button
                     android:id="@+id/btnBackground"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    style="@style/Widget.Nothing.Button.Outlined"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/progress_background" />
 
                 <Button
                     android:id="@+id/btnCancel"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    style="@style/Widget.Nothing.Button.Text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
@@ -103,151 +102,152 @@
                 android:background="?attr/selectableItemBackground"
                 android:padding="8dp"
                 android:text="@string/progress_details_show"
-                android:textColor="?android:attr/textColorSecondary" />
+                android:textAppearance="@style/TextAppearance.Nothing.Label" />
 
-            <!-- technical details, hidden unless asked for -->
-            <LinearLayout
+            <!-- technical details, hidden unless asked for: the running command and the file in and out -->
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/detailsContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
+                android:layout_marginTop="8dp"
                 android:visibility="gone">
 
-                <TextView
-                    android:id="@+id/lblFfmpegCommand"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/ffmpeg_command"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/txtFfmpegCommand"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    android:breakStrategy="simple"
-                    android:fontFamily="monospace"
-                    android:hyphenationFrequency="none"
-                    android:textSize="12sp" />
+                    android:orientation="vertical"
+                    android:padding="20dp">
 
-                <TableLayout
-                    android:id="@+id/tableLayout2"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/details_command"
+                        android:textAppearance="@style/TextAppearance.Nothing.Label" />
 
-                    <TableRow>
+                    <TextView
+                        android:id="@+id/txtFfmpegCommand"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:background="@drawable/details_code_background"
+                        android:fontFamily="@font/space_mono"
+                        android:lineSpacingExtra="2dp"
+                        android:padding="12dp"
+                        android:textIsSelectable="true"
+                        android:textSize="12sp" />
+
+                    <!-- label, name, size: one line each -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:baselineAligned="true"
+                        android:orientation="horizontal">
 
                         <TextView
-                            android:id="@+id/lblInputFile"
-                            android:layout_width="wrap_content"
+                            android:layout_width="88dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
-                            android:text="@string/input_file"
-                            android:textStyle="bold" />
+                            android:text="@string/details_input"
+                            android:textAppearance="@style/TextAppearance.Nothing.Label" />
 
                         <TextView
                             android:id="@+id/txtInputFile"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:breakStrategy="simple" />
-                    </TableRow>
-
-                    <TableRow>
-
-                        <TextView
-                            android:id="@+id/lblInputFileSize"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/input_file_size"
-                            android:textStyle="bold" />
+                            android:ellipsize="middle"
+                            android:singleLine="true"
+                            android:textSize="15sp" />
 
                         <TextView
                             android:id="@+id/txtInputFileSize"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1" />
-                    </TableRow>
-
-                    <TableRow>
-
-                        <TextView
-                            android:id="@+id/lblOutputFile"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:text="@string/output_file"
-                            android:textStyle="bold" />
+                            android:layout_marginStart="8dp"
+                            android:fontFamily="@font/space_mono"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:baselineAligned="true"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="88dp"
+                            android:layout_height="wrap_content"
+                            android:text="@string/details_output"
+                            android:textAppearance="@style/TextAppearance.Nothing.Label" />
 
                         <TextView
                             android:id="@+id/txtOutputFile"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
                             android:layout_weight="1"
-                            android:breakStrategy="simple"
-                            android:hyphenationFrequency="none" />
-                    </TableRow>
-
-                    <TableRow>
-
-                        <TextView
-                            android:id="@+id/lblOutputFileSize"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/output_file_size"
-                            android:textStyle="bold" />
+                            android:ellipsize="middle"
+                            android:singleLine="true"
+                            android:textSize="15sp" />
 
                         <TextView
                             android:id="@+id/txtOutputFileSize"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1" />
-                    </TableRow>
-
-                    <TableRow android:id="@+id/processedTableRow">
-
-                        <TextView
-                            android:id="@+id/lblProcessed"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:text="@string/processed"
-                            android:textStyle="bold" />
+                            android:layout_marginStart="8dp"
+                            android:fontFamily="@font/space_mono"
+                            android:textColor="@color/mono_accent"
+                            android:textSize="13sp" />
+                    </LinearLayout>
 
-                        <LinearLayout
+                    <!-- videos only: how far into the clip ffmpeg is -->
+                    <LinearLayout
+                        android:id="@+id/processedTableRow"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:baselineAligned="true"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="88dp"
+                            android:layout_height="wrap_content"
+                            android:text="@string/details_progress"
+                            android:textAppearance="@style/TextAppearance.Nothing.Label" />
+
+                        <TextView
+                            android:id="@+id/txtProcessedTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/space_mono"
+                            android:textSize="13sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/space_mono"
+                            android:text=" / "
+                            android:textSize="13sp"
+                            tools:ignore="HardcodedText" />
+
+                        <TextView
+                            android:id="@+id/txtProcessedTimeTotal"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
                             android:layout_weight="1"
-                            android:orientation="horizontal">
+                            android:fontFamily="@font/space_mono"
+                            android:textSize="13sp" />
 
-                            <TextView
-                                android:id="@+id/txtProcessedTime"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="4dp"
-                                android:layout_marginEnd="4dp"
-                                android:text="@string/x_of_x" />
-
-                            <TextView
-                                android:id="@+id/txtProcessedTimeTotal"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content" />
-
-                            <TextView
-                                android:id="@+id/txtProcessedPercent"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="4dp" />
-                        </LinearLayout>
-                    </TableRow>
-                </TableLayout>
-            </LinearLayout>
+                        <TextView
+                            android:id="@+id/txtProcessedPercent"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:fontFamily="@font/space_mono"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
     </ScrollView>
 
@@ -323,7 +323,7 @@
 
             <Button
                 android:id="@+id/btnShowFailed"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
+                style="@style/Widget.Nothing.Button.Text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/result_see_failed"
@@ -335,8 +335,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:text="@string/result_biggest_savings"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textAppearance="@style/TextAppearance.Nothing.Label" />
 
             <TextView
                 android:id="@+id/txtBiggestSavings"
@@ -361,7 +360,7 @@
 
             <Button
                 android:id="@+id/btnUndoTrash"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/Widget.Nothing.Button.Outlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -370,7 +369,7 @@
 
             <Button
                 android:id="@+id/btnOpenFolder"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/Widget.Nothing.Button.Outlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -378,7 +377,7 @@
 
             <Button
                 android:id="@+id/btnDone"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
+                style="@style/Widget.Nothing.Button.Text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"

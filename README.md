@@ -1,32 +1,51 @@
-# <img src="fastlane/metadata/android/en-US/images/icon.png" height="32"> FFShare
+# <img src="docs/screenshots/icon.png" height="32"> Nothing Media Compressor
 
-[<img src="https://f-droid.org/badge/get-it-on.png"
-      alt="Get it on F-Droid"
-      height="80">](https://f-droid.org/app/com.caydey.ffshare)
-[<img src="https://github.com/user-attachments/assets/713d71c5-3dec-4ec4-a3f2-8d28d025a9c6"
-      alt='Get it on Obtainium'
-      height="80">](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.caydey.ffshare%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fcaydey%2Fffshare%22%2C%22author%22%3A%22caydey%22%2C%22name%22%3A%22FFShare%22%2C%22preferredApkIndex%22%3A1%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Afalse%2C%5C%22fallbackToOlderReleases%5C%22%3Atrue%2C%5C%22filterReleaseTitlesByRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22filterReleaseNotesByRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22verifyLatestTag%5C%22%3Afalse%2C%5C%22dontSortReleasesList%5C%22%3Afalse%2C%5C%22useLatestAssetDateAsReleaseDate%5C%22%3Afalse%2C%5C%22releaseTitleAsVersion%5C%22%3Afalse%2C%5C%22trackOnly%5C%22%3Afalse%2C%5C%22versionExtractionRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22matchGroupToUse%5C%22%3A%5C%22%5C%22%2C%5C%22versionDetection%5C%22%3Atrue%2C%5C%22releaseDateAsVersion%5C%22%3Afalse%2C%5C%22useVersionCodeAsOSVersion%5C%22%3Afalse%2C%5C%22apkFilterRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22invertAPKFilter%5C%22%3Afalse%2C%5C%22autoApkFilterByArch%5C%22%3Atrue%2C%5C%22appName%5C%22%3A%5C%22%5C%22%2C%5C%22shizukuPretendToBeGooglePlay%5C%22%3Afalse%2C%5C%22allowInsecure%5C%22%3Afalse%2C%5C%22exemptFromBackgroundUpdates%5C%22%3Afalse%2C%5C%22skipUpdateNotifications%5C%22%3Afalse%2C%5C%22about%5C%22%3A%5C%22%5C%22%2C%5C%22refreshBeforeDownload%5C%22%3Afalse%7D%22%2C%22overrideSource%22%3A%22GitHub%22%7D)
-
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/caydey/FFShare)](https://github.com/caydey/ffshare/releases/latest)
-[![GitHub all releases](https://img.shields.io/github/downloads/caydey/ffshare/total)](https://github.com/caydey/ffshare/releases/latest)
-[![GitHub license](https://img.shields.io/github/license/caydey/ffshare)](https://github.com/caydey/ffshare/blob/master/LICENSE)
-
-An android app to compress image, video and audio files through ffmpeg before sharing them
-
-## Images
+Make photos and videos much smaller on your Android phone and get your storage back. A Nothing OS styled fork of [FFShare](https://github.com/caydey/ffshare).
 
 <p align="left">
-      <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="270">
-      <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="270">
-      <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="270">
-      <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="270">
+  <img src="docs/screenshots/1_home.png" width="200">
+  <img src="docs/screenshots/2_save_folder.png" width="200">
+  <img src="docs/screenshots/4_progress.png" width="200">
+  <img src="docs/screenshots/5_results.png" width="200">
+</p>
+
+## What it does
+
+- **Pick photos and videos together** with the system photo picker, or share them straight from the gallery ("Compress & save" or "Compress & share"). "Browse files" handles audio and more than 100 files at once.
+- **Swipe a quality card**: Ultra, Smallest, Balanced (recommended), Best quality or Custom. Every card shows a typical result.
+- **Photo format**: WebP for the smallest files, or keep the original format (a JPEG stays a JPEG).
+- **Saves to a folder you choose**, then offers to move the originals to the trash (kept there 30 days, with Undo). Works for files shared from Google Photos.
+- **Keeps what matters**: the date taken and location, upright rotation, transparency in PNGs, and animation in GIFs. A file that would only get bigger stays as it is.
+- **Big batches**: photos are compressed several at a time while videos take their own lane. It keeps running with the screen off, shows progress in a notification and stops cleanly on Cancel.
+- **Fast video on real phones**: uses the phone's hardware encoder when it has one, and falls back to normal encoding automatically if the encoder fails or hangs.
+
+## Looks
+
+Monochrome with one red accent, dot-matrix headlines ([Doto](https://fonts.google.com/specimen/Doto)) and monospace labels ([Space Mono](https://fonts.google.com/specimen/Space+Mono)), light and dark. The launcher icon has a monochrome layer for themed icons.
+
+<p align="left">
+  <img src="docs/screenshots/3_dark.png" width="200">
+  <img src="docs/screenshots/6_setup.png" width="200">
 </p>
 
 ## Building
 
-- Create ffmpeg-kit binaries by running `./build_ffmpegkit.sh`
+The FFmpeg library is prebuilt in `app/libs` (arm64 with MediaCodec), so a normal Android build works:
 
-## Used Libraries
+```sh
+./gradlew :app:assembleDebug
+```
 
-- [FFmpegKitNext](https://github.com/arthenica/ffmpeg-kit-next)
+To rebuild FFmpeg itself, run `./build_ffmpegkit.sh` (needs Nix).
+
+The app id is `com.caydey.ffshare.plus`, so it installs next to the original FFShare.
+
+## Credits and license
+
+- [FFShare](https://github.com/caydey/ffshare) by caydey, the app this is built on
+- [Scrambled-Exif](https://gitlab.com/juanitobananas/scrambled-exif) by juanitobananas, which inspired the original
+- [ffmpeg-kit-next](https://github.com/arthenica/ffmpeg-kit-next) by arthenica, the FFmpeg library
 - [Timber](https://github.com/JakeWharton/timber)
+- Fonts Doto and Space Mono, SIL Open Font License
+
+GPL-3.0, like FFShare. See [LICENSE](LICENSE). Not affiliated with Nothing Technology.

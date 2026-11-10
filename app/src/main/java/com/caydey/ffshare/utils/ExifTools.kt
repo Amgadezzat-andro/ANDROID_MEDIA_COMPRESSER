@@ -7,18 +7,42 @@ import java.io.InputStream
 
 class ExifTools {
     companion object {
-        fun copyExif(inputFileStream: InputStream, outputFile: File) {
+        fun copyExif(inputFileStream: InputStream, outputFile: File, outputWidth: Int, outputHeight: Int) {
             val inputExifInterface = ExifInterface(inputFileStream)
             val outputExifInterface = ExifInterface(outputFile)
             for (exifTag in exifTags) {
+                if (exifTag in sizeTags) continue
                 val value = inputExifInterface.getAttribute(exifTag)
                 if (value != null) {
                     Timber.d("Copying tag: '%s'", exifTag)
                     outputExifInterface.setAttribute(exifTag, value)
                 }
             }
+            // ffmpeg already turned the pixels upright, a copied rotation would turn the photo a second time
+            outputExifInterface.setAttribute(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL.toString())
+            if (outputWidth > 0 && outputHeight > 0) {
+                outputExifInterface.setAttribute(ExifInterface.TAG_PIXEL_X_DIMENSION, outputWidth.toString())
+                outputExifInterface.setAttribute(ExifInterface.TAG_PIXEL_Y_DIMENSION, outputHeight.toString())
+            }
             outputExifInterface.saveAttributes()
         }
+
+        // describe the original file (its size, embedded previews), wrong for the smaller copy
+        private val sizeTags = setOf(
+            ExifInterface.TAG_IMAGE_WIDTH,
+            ExifInterface.TAG_IMAGE_LENGTH,
+            ExifInterface.TAG_PIXEL_X_DIMENSION,
+            ExifInterface.TAG_PIXEL_Y_DIMENSION,
+            ExifInterface.TAG_JPEG_INTERCHANGE_FORMAT,
+            ExifInterface.TAG_JPEG_INTERCHANGE_FORMAT_LENGTH,
+            ExifInterface.TAG_THUMBNAIL_IMAGE_LENGTH,
+            ExifInterface.TAG_THUMBNAIL_IMAGE_WIDTH,
+            ExifInterface.TAG_DEFAULT_CROP_SIZE,
+            ExifInterface.TAG_ORF_THUMBNAIL_IMAGE,
+            ExifInterface.TAG_ORF_PREVIEW_IMAGE_START,
+            ExifInterface.TAG_ORF_PREVIEW_IMAGE_LENGTH,
+            ExifInterface.TAG_RW2_JPG_FROM_RAW,
+        )
         fun isValidType(mediaType: Utils.MediaType): Boolean {
             return (
                 mediaType == Utils.MediaType.JPEG ||

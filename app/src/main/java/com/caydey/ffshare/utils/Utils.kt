@@ -11,17 +11,22 @@ import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import android.provider.MediaStore
+import androidx.exifinterface.media.ExifInterface
 import android.provider.OpenableColumns
 import androidx.core.content.ContextCompat
 import com.caydey.ffshare.BuildConfig
 import com.caydey.ffshare.R
 import timber.log.Timber
 import java.io.InputStream
+import java.text.SimpleDateFormat
 import kotlin.math.ln
 import kotlin.math.pow
 
 
 const val MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1000
+// MediaStore.PickerMediaColumns.DATE_TAKEN, a constant only from android 13 but the column is there on every picker
+private const val PICKER_DATE_TAKEN = "datetaken"
 class Utils(private val context: Context) {
     private val settings: Settings by lazy { Settings(context) }
 
@@ -85,7 +90,30 @@ class Utils(private val context: Context) {
             }
             cursor.close()
         }
+        if (isPhotoPickerUri(uri)) {
+            // the photo picker hides real names ("65.mp4"), a camera style name from the date taken is far
+            // more useful in the save folder than the picker's number
+            filename = pickerFilename(uri, filename) ?: filename
+        }
         return filename
+    }
+
+    fun isPhotoPickerUri(uri: Uri): Boolean =
+        uri.authority == MediaStore.AUTHORITY && uri.pathSegments.firstOrNull()?.startsWith("picker") == true
+
+    // IMG_20240314_101500.jpg / VID_... from the picker's date taken, null when it has none
+    private fun pickerFilename(uri: Uri, pickerName: String?): String? {
+        val dateTaken = try {
+            context.contentResolver.query(uri, arrayOf(PICKER_DATE_TAKEN, OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst() && !cursor.isNull(0)) cursor.getLong(0) else null
+            }
+        } catch (e: Exception) {
+            null
+        } ?: return null
+        if (dateTaken <= 0) return null
+        val prefix = if (context.contentResolver.getType(uri)?.startsWith("video/") == true) "VID" else "IMG"
+        val extension = pickerName?.substringAfterLast('.', "")?.takeIf { it.isNotEmpty() }?.let { ".$it" } ?: ""
+        return prefix + "_" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date(dateTaken)) + extension
     }
     fun getFileSizeFromUri(uri: Uri): Long {
         try {
@@ -102,6 +130,9 @@ class Utils(private val context: Context) {
 
     val isReadPermissionGranted: Boolean
         get() {
+            // android 13+ has no such permission any more (always "denied"), shared and picked files come
+            // with their own access. asking anyway opens an empty permission screen that restarts ours
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) return true
             val check = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
             return (check == PackageManager.PERMISSION_GRANTED)
         }
@@ -145,7 +176,8 @@ class Utils(private val context: Context) {
                 "ogg" to MediaType.OGG,
                 "aac" to MediaType.AAC,
                 "wav" to MediaType.WAV,
-                "opus" to MediaType.OPUS
+                "opus" to MediaType.OPUS,
+                "m4a" to MediaType.M4A
             )
 
             val extension = filename.substringAfterLast('.').lowercase()
@@ -192,13 +224,22 @@ class Utils(private val context: Context) {
 
         return mediaType
     }
+    // the size as shown on screen: ffmpeg turns photos and videos upright before scaling, so a portrait
+    // photo stored sideways (4000x3000 + "rotate 90") is 3000x4000 here
     fun getMediaResolution(mediaUri: Uri, mediaType: MediaType): Pair<Int,Int> {
         // image
         if (isImage(mediaType)) {
             // only read the header, decoding the whole bitmap is slow and memory heavy
             val bitmapOptions = BitmapFactory.Options().apply { inJustDecodeBounds = true }
             context.contentResolver.openInputStream(mediaUri)?.use { BitmapFactory.decodeStream(it, null, bitmapOptions) }
-            return Pair(maxOf(bitmapOptions.outWidth, 0), maxOf(bitmapOptions.outHeight, 0))
+            val width = maxOf(bitmapOptions.outWidth, 0)
+            val height = maxOf(bitmapOptions.outHeight, 0)
+            val rotated = try {
+                context.contentResolver.openInputStream(mediaUri)?.use { ExifInterface(it).rotationDegrees % 180 != 0 } ?: false
+            } catch (e: Exception) {
+                false
+            }
+            return if (rotated) Pair(height, width) else Pair(width, height)
         }
         // video
         // attempt to get video resolution
@@ -209,10 +250,11 @@ class Utils(private val context: Context) {
             return Pair(0,0) // unable to read video width/height, usually happens with avi files
         }
         // read video resolution
-        val width = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)!!.toInt()
-        val height = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)!!.toInt()
+        val width = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull() ?: 0
+        val height = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull() ?: 0
+        val rotation = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)?.toIntOrNull() ?: 0
         retriever.release()
-        return Pair(width,height)
+        return if (rotation % 180 != 0) Pair(height, width) else Pair(width, height)
     }
 
     fun bytesToHuman(bytes: Long): String {
@@ -252,7 +294,7 @@ class Utils(private val context: Context) {
     enum class MediaType {
         MP4, MKV, WEBM, AVI, // videos
         JPEG, JPG, PNG, GIF, WEBP, // images
-        MP3, OGG, AAC, WAV, OPUS, // audios
+        MP3, OGG, AAC, WAV, OPUS, M4A, // audios (m4a: voice recorder and messenger audio)
         UNKNOWN
     }
     fun isSupportedMediaType(type: MediaType): Boolean {
@@ -269,7 +311,7 @@ class Utils(private val context: Context) {
     }
     fun isAudio(type: MediaType): Boolean {
         return type == MediaType.MP3 || type == MediaType.OGG || type == MediaType.AAC
-                || type == MediaType.WAV || type == MediaType.OPUS
+                || type == MediaType.WAV || type == MediaType.OPUS || type == MediaType.M4A
     }
 
     fun getAllowedMimes(): Array<String> {

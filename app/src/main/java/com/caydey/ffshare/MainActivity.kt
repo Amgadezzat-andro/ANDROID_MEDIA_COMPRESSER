@@ -1,19 +1,32 @@
 package com.caydey.ffshare
 
 import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
+import android.provider.MediaStore
 import android.text.method.LinkMovementMethod
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.MarginPageTransformer
+import androidx.viewpager2.widget.ViewPager2
 import com.caydey.ffshare.databinding.ActivityMainBinding
+import com.caydey.ffshare.databinding.ItemPresetCardBinding
 import com.caydey.ffshare.utils.SaveFolder
 import com.caydey.ffshare.utils.Settings
 import com.caydey.ffshare.utils.Settings.QualityPreset
 import com.caydey.ffshare.utils.Utils
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 
 class MainActivity : AppCompatActivity() {
@@ -22,38 +35,19 @@ class MainActivity : AppCompatActivity() {
     private val settings: Settings by lazy { Settings(applicationContext) }
     private lateinit var binding: ActivityMainBinding
 
-    // chip id -> preset, and the summary shown under the chips
-    private val presetChips = mapOf(
-        R.id.chipMaxCompression to QualityPreset.MAX_COMPRESSION,
-        R.id.chipBalanced to QualityPreset.BALANCED,
-        R.id.chipHighQuality to QualityPreset.HIGH_QUALITY,
-        R.id.chipCustom to QualityPreset.CUSTOM
-    )
-    private val presetSummaries = mapOf(
-        QualityPreset.MAX_COMPRESSION to R.string.preset_max_compression_summary,
-        QualityPreset.BALANCED to R.string.preset_balanced_summary,
-        QualityPreset.HIGH_QUALITY to R.string.preset_high_quality_summary,
-        QualityPreset.CUSTOM to R.string.preset_custom_summary
-    )
-    // true while the chips are set from code, so the listener doesn't re-apply the preset
-    private var updatingChips = false
+    private val presetAdapter = PresetPagerAdapter(onOpenSettings = { openSettings() })
+    // only a swipe or a dot tap picks a preset, not the pager settling on the saved one
+    private var userSwiping = false
+    // true while the photo format buttons are set from code
+    private var updatingPhotoFormat = false
 
+    // photos and videos together, in the system photo picker
+    private val mediaPickerLauncher = registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(pickerLimit)) {
+        compress(it)
+    }
+    // the files app: no limit on how many, and audio too
     private val selectedFileLauncher = registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) {
-        // exited from file picker without selecting a file
-        if (it.isEmpty()) {
-            return@registerForActivityResult
-        }
-
-        val intent = Intent(this, HandleMediaActivity::class.java)
-        val uris = ArrayList<Parcelable>(it) // convert List<> to ArrayList<> for intent
-
-        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
-
-        // always send multiple since sending an array (uris)
-        intent.action = Intent.ACTION_SEND_MULTIPLE
-
-        // simulate clicking share button
-        startActivity(intent)
+        compress(it)
     }
 
     private val folderPickerLauncher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
@@ -67,34 +61,38 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // the launcher can start a second copy on top of a restored task, keep only the first
+        if (!isTaskRoot && intent.action == Intent.ACTION_MAIN && intent.hasCategory(Intent.CATEGORY_LAUNCHER)) {
+            finish()
+            return
+        }
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
 
         binding.lblVersion.text = getString(R.string.version, App.versionName)
 
-        // first launch: quality, folder and notifications in three quick steps
-        if (!settings.onboardingDone) {
+        // first launch: quality, folder and notifications in three quick steps.
+        // a restored screen (rotation, app reopened after android closed it) already has it on top
+        if (!settings.onboardingDone && savedInstanceState == null) {
             startActivity(Intent(this, OnboardingActivity::class.java))
         }
 
-        // allow clicking on links
-        binding.lblIntroductionLine0.movementMethod = LinkMovementMethod.getInstance()
-        binding.lblIntroductionLine1.movementMethod = LinkMovementMethod.getInstance()
-        binding.lblIntroductionLine2.movementMethod = LinkMovementMethod.getInstance()
-
-        // Select File button listener
         binding.btnSelectFile.setOnClickListener {
+            mediaPickerLauncher.launch(PickVisualMediaRequest(PickVisualMedia.ImageAndVideo))
+        }
+        binding.btnBrowseFiles.text = getString(R.string.browse_files_button, pickerLimit)
+        binding.btnBrowseFiles.setOnClickListener {
             selectedFileLauncher.launch(utils.getAllowedMimes())
         }
 
-        binding.chipGroupPreset.setOnCheckedStateChangeListener { _, checkedIds ->
-            val preset = checkedIds.firstOrNull()?.let { presetChips[it] } ?: return@setOnCheckedStateChangeListener
-            if (!updatingChips) {
-                // custom keeps whatever is in the settings screen
-                if (preset == QualityPreset.CUSTOM) settings.qualityPreset = preset else settings.applyQualityPreset(preset)
-            }
-            binding.lblPresetSummary.setText(presetSummaries.getValue(preset))
+        setUpPresetPager()
+
+        binding.togglePhotoFormat.addOnButtonCheckedListener { _, buttonId, isChecked ->
+            if (!isChecked || updatingPhotoFormat) return@addOnButtonCheckedListener
+            settings.imageConversionOutput = if (buttonId == R.id.btnFormatWebp) Utils.MediaType.WEBP else Utils.MediaType.UNKNOWN
+            updatePhotoFormat()
         }
 
         binding.btnChooseFolder.setOnClickListener { folderPickerLauncher.launch(SaveFolder.PICKER_START) }
@@ -110,11 +108,140 @@ class MainActivity : AppCompatActivity() {
         if (!settings.isQualityPresetSet) {
             settings.applyQualityPreset(QualityPreset.BALANCED)
         }
-        updatingChips = true
-        binding.chipGroupPreset.check(presetChips.entries.first { it.value == settings.qualityPreset }.key)
-        updatingChips = false
+        val preset = settings.qualityPreset
+        presetAdapter.selected = preset
+        userSwiping = false
+        binding.pagerPreset.setCurrentItem(preset.ordinal, false)
+        updateDots(preset.ordinal)
+        updatePhotoFormat()
+        updateOpenBatch()
         updateSaveFolder()
         updateStats()
+    }
+
+    // same as sharing to the app from the gallery
+    private fun compress(uris: List<Uri>) {
+        // left the picker without choosing anything
+        if (uris.isEmpty()) {
+            return
+        }
+        val intent = Intent(this, HandleMediaActivity::class.java)
+        intent.action = Intent.ACTION_SEND_MULTIPLE
+        intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList<Parcelable>(uris))
+        startActivity(intent)
+    }
+
+    private fun setUpPresetPager() {
+        val pager = binding.pagerPreset
+        pager.adapter = presetAdapter
+        pager.offscreenPageLimit = 1
+        // neighbouring cards peek in at the edges so it's clear there is more to swipe to
+        val sidePadding = resources.getDimensionPixelSize(R.dimen.preset_card_side_padding)
+        (pager.getChildAt(0) as RecyclerView).apply {
+            setPadding(sidePadding, 0, sidePadding, 0)
+            clipToPadding = false
+        }
+        pager.setPageTransformer(MarginPageTransformer(resources.getDimensionPixelSize(R.dimen.preset_card_gap)))
+
+        pager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageScrollStateChanged(state: Int) {
+                // a drag that springs back to the same card never selects a page, so the flag has to end
+                // here, or the next page change made by code would count as the user's choice
+                when (state) {
+                    ViewPager2.SCROLL_STATE_DRAGGING -> userSwiping = true
+                    ViewPager2.SCROLL_STATE_IDLE -> userSwiping = false
+                }
+            }
+
+            override fun onPageSelected(position: Int) {
+                updateDots(position)
+                if (userSwiping) {
+                    userSwiping = false
+                    selectPreset(PresetPagerAdapter.PRESETS[position])
+                }
+            }
+        })
+
+        val dotSize = resources.getDimensionPixelSize(R.dimen.preset_dot_touch_size)
+        PresetPagerAdapter.PRESETS.forEachIndexed { index, preset ->
+            val dot = ImageView(this).apply {
+                layoutParams = LinearLayout.LayoutParams(dotSize, dotSize)
+                setImageResource(R.drawable.preset_dot)
+                scaleType = ImageView.ScaleType.CENTER
+                contentDescription = getString(R.string.preset_dot_description, getString(PresetPagerAdapter.nameOf(preset)))
+                setOnClickListener {
+                    pager.setCurrentItem(index, true)
+                    selectPreset(preset)
+                }
+            }
+            binding.presetDots.addView(dot)
+        }
+
+        // cards differ in length and fonts can be large, so the pager takes the tallest card's height
+        pager.post { fitPagerHeight() }
+    }
+
+    private fun selectPreset(preset: QualityPreset) {
+        // called from the pager's scroll callback, the outline can only change once that pass is over
+        binding.pagerPreset.post { presetAdapter.selected = preset }
+        if (preset == settings.qualityPreset) return
+        // custom keeps whatever is in the settings screen
+        if (preset == QualityPreset.CUSTOM) settings.qualityPreset = preset else settings.applyQualityPreset(preset)
+    }
+
+    private fun updateDots(position: Int) {
+        for (i in 0 until binding.presetDots.childCount) {
+            binding.presetDots.getChildAt(i).alpha = if (i == position) 1f else 0.25f
+        }
+    }
+
+    private fun fitPagerHeight() {
+        val pager = binding.pagerPreset
+        val recycler = pager.getChildAt(0) as RecyclerView
+        val cardWidth = pager.width - recycler.paddingLeft - recycler.paddingRight
+        if (cardWidth <= 0) return
+        val tallest = PresetPagerAdapter.PRESETS.maxOf { preset ->
+            val card = ItemPresetCardBinding.inflate(layoutInflater, recycler, false)
+            presetAdapter.bind(card, preset)
+            card.root.measure(
+                View.MeasureSpec.makeMeasureSpec(cardWidth, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+            )
+            card.root.measuredHeight
+        }
+        if (pager.layoutParams.height != tallest) {
+            pager.layoutParams = pager.layoutParams.apply { height = tallest }
+        }
+    }
+
+    // the compress screen is hidden from recents, without notifications this is the only way back to it
+    private fun updateOpenBatch() {
+        val state = HandleMediaActivity.openBatch
+        binding.cardOpenBatch.visibility = if (state == HandleMediaActivity.Companion.BatchState.NONE) View.GONE else View.VISIBLE
+        binding.lblOpenBatch.setText(
+            if (state == HandleMediaActivity.Companion.BatchState.RUNNING) R.string.open_batch_running else R.string.open_batch_finished
+        )
+        binding.cardOpenBatch.setOnClickListener {
+            // same as tapping the notification: brings the existing screen back, never starts a batch
+            startActivity(Intent(this, HandleMediaActivity::class.java).putExtra(HandleMediaActivity.EXTRA_FROM_NOTIFICATION, true))
+        }
+    }
+
+    // webp or the original's format; other formats can only be picked in the advanced settings
+    private fun updatePhotoFormat() {
+        val format = settings.imageConversionOutput
+        updatingPhotoFormat = true
+        when (format) {
+            Utils.MediaType.WEBP -> binding.togglePhotoFormat.check(R.id.btnFormatWebp)
+            Utils.MediaType.UNKNOWN -> binding.togglePhotoFormat.check(R.id.btnFormatOriginal)
+            else -> binding.togglePhotoFormat.clearChecked()
+        }
+        updatingPhotoFormat = false
+        binding.lblPhotoFormatHint.text = when (format) {
+            Utils.MediaType.WEBP -> getString(R.string.photo_format_webp_hint)
+            Utils.MediaType.UNKNOWN -> getString(R.string.photo_format_original_hint)
+            else -> getString(R.string.photo_format_other_hint, format.name)
+        }
     }
 
     private fun updateStats() {
@@ -130,15 +257,40 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // folder name big, its path and what happens to originals underneath
     private fun updateSaveFolder() {
-        val folderName = SaveFolder.displayName(this)
-        if (folderName == null) {
-            binding.lblSaveFolder.setText(R.string.save_to_not_set)
-            binding.btnClearFolder.visibility = View.GONE
+        val folderPath = SaveFolder.displayName(this)
+        val isSet = folderPath != null
+        binding.imgSaveFolderDot.visibility = if (isSet) View.VISIBLE else View.GONE
+        binding.lblSaveFolderState.setText(if (isSet) R.string.save_to_on else R.string.save_to_off)
+        if (folderPath == null) {
+            binding.lblSaveFolder.setText(R.string.save_to_none)
+            binding.lblSaveFolderPath.setText(R.string.save_to_not_set)
+            binding.btnChooseFolder.setText(R.string.save_to_choose)
         } else {
-            binding.lblSaveFolder.text = folderName
-            binding.btnClearFolder.visibility = View.VISIBLE
+            binding.lblSaveFolder.text = folderPath.substringAfterLast('/')
+            binding.lblSaveFolderPath.text = getString(R.string.save_to_path, folderPath)
+            binding.btnChooseFolder.setText(R.string.save_to_change)
         }
+        binding.btnClearFolder.visibility = if (isSet) View.VISIBLE else View.GONE
+    }
+
+    // the projects this app is built on, with their links
+    private fun showAbout() {
+        val credits = listOf(R.string.introduction_line_0, R.string.introduction_line_1, R.string.introduction_line_2)
+            .map { getText(it) }
+        val message = android.text.SpannableStringBuilder()
+        credits.forEachIndexed { i, line -> if (i > 0) message.append("\n\n"); message.append(line) }
+        val dialog = MaterialAlertDialogBuilder(this)
+            .setTitle(getString(R.string.version, App.versionName))
+            .setMessage(message)
+            .setPositiveButton(R.string.close, null)
+            .show()
+        dialog.findViewById<TextView>(android.R.id.message)?.movementMethod = LinkMovementMethod.getInstance()
+    }
+
+    private fun openSettings() {
+        startActivity(Intent(applicationContext, PreferencesActivity::class.java))
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -149,9 +301,16 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_settings -> startActivity(Intent(applicationContext, PreferencesActivity::class.java))
+            R.id.action_settings -> openSettings()
             R.id.action_history -> startActivity(Intent(applicationContext, LogsActivity::class.java))
+            R.id.action_about -> showAbout()
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    companion object {
+        // how many files the photo picker hands over at once (usually 100), bigger batches use "Browse files"
+        private val pickerLimit: Int
+            get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) MediaStore.getPickImagesMaxLimit() else 100
     }
 }

@@ -1,10 +1,12 @@
 package com.caydey.ffshare
 
+import android.Manifest
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -20,6 +22,7 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import com.caydey.ffshare.extensions.parcelable
 import com.caydey.ffshare.extensions.parcelableArrayList
@@ -45,6 +48,9 @@ class HandleMediaActivity : AppCompatActivity() {
     // share-mode batch that finished while the user was elsewhere, shared when they come back
     private var pendingShare: MediaCompressor.BatchResult? = null
 
+    // set when this screen recreates itself for a newly shared batch, unlike a recreation by android
+    private var startingNewBatch = false
+
     // originals offered for the trash on the results page, kept for undo
     private var trashUris: List<Uri> = emptyList()
     private var trashFreedBytes = 0L
@@ -53,6 +59,11 @@ class HandleMediaActivity : AppCompatActivity() {
         if (it.resultCode == RESULT_OK) {
             onTrashChanged()
         }
+    }
+
+    // either answer continues, without it photos just lose their location
+    private val mediaLocationLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+        onMediaReceive()
     }
 
     // "Compress & save" with no folder chosen yet asks for one first
@@ -69,9 +80,14 @@ class HandleMediaActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (intent.getBooleanExtra(EXTRA_FROM_NOTIFICATION, false)) {
+        // recreated by android (app was closed in the background): this screen's batch is gone, starting it
+        // again from the old intent would compress everything twice
+        val recreatedByAndroid = savedInstanceState != null && !savedInstanceState.getBoolean(STATE_NEW_BATCH, false)
+        if (intent.getBooleanExtra(EXTRA_FROM_NOTIFICATION, false) || recreatedByAndroid) {
             // the batch this notification was for is gone (app was restarted), show the main screen instead
-            startActivity(Intent(this, MainActivity::class.java))
+            // in the app's own task (not this one), reusing the main screen if it's open
+            startActivity(Intent(this, MainActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP))
             finish()
             return
         }
@@ -118,6 +134,7 @@ class HandleMediaActivity : AppCompatActivity() {
         } else {
             // this screen is only showing an old batch's results, start fresh with the new files
             setIntent(intent)
+            startingNewBatch = true
             recreate()
         }
     }
@@ -128,6 +145,16 @@ class HandleMediaActivity : AppCompatActivity() {
             pendingShare = null
             finishShare(it)
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(STATE_NEW_BATCH, startingNewBatch)
+    }
+
+    override fun onDestroy() {
+        openBatch = BatchState.NONE
+        super.onDestroy()
     }
 
     override fun finish() {
@@ -160,6 +187,11 @@ class HandleMediaActivity : AppCompatActivity() {
     }
 
     private fun onMediaReceive() {
+        // one batch at a time, whichever way a second start sneaks in (relaunch, double permission answer)
+        if (running || openBatch == BatchState.RUNNING) {
+            Timber.w("Batch already running, not starting another")
+            return
+        }
         // "intent" variable is the shared item
         val receivedMedia =
             when (intent.action) {
@@ -176,6 +208,22 @@ class HandleMediaActivity : AppCompatActivity() {
             return
         }
 
+        // android blanks the gps position in photos it hands to apps without this permission, so
+        // "keep photo date and location" would silently keep only the date. asked once
+        if (settings.copyExifTags && !settings.mediaLocationAsked &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_MEDIA_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            settings.mediaLocationAsked = true
+            // android words this as access to all photos, so say first what it is for
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.location_permission_title)
+                .setMessage(R.string.location_permission_body)
+                .setPositiveButton(R.string.location_permission_continue) { _, _ -> mediaLocationLauncher.launch(Manifest.permission.ACCESS_MEDIA_LOCATION) }
+                .setNegativeButton(R.string.location_permission_skip) { _, _ -> onMediaReceive() }
+                .setCancelable(false)
+                .show()
+            return
+        }
+
         val saveToFolder = wantsSaveToFolder()
         if (saveToFolder && !SaveFolder.isUsable(this)) {
             Toast.makeText(this, getString(R.string.choose_folder_first), Toast.LENGTH_LONG).show()
@@ -184,11 +232,14 @@ class HandleMediaActivity : AppCompatActivity() {
         }
 
         running = true
+        openBatch = BatchState.RUNNING
         CompressionService.start(this)
         mediaCompressor.compressFiles(this, receivedMedia, saveToFolder, progressCallback = { done, total, savedBytes, timeLeft ->
             CompressionService.updateProgress(applicationContext, done, total, savedBytes, timeLeft)
         }) { result ->
             running = false
+            // a screen that is already gone has no results left to come back to
+            if (!isDestroyed) openBatch = BatchState.FINISHED
             CompressionService.stop(applicationContext)
             runOnUiThread { onBatchFinished(result) }
         }
@@ -384,10 +435,16 @@ class HandleMediaActivity : AppCompatActivity() {
     // picker/document uris convert to the generic "files" table which the trash refuses
     @RequiresApi(Build.VERSION_CODES.R)
     private fun toMediaStoreUri(uri: Uri): Uri? {
+        // photo picker items end in the MediaStore id only when they're on this phone. a cloud item's id
+        // belongs to the cloud app and could point at a different local file, so it's never trashed
+        if (utils.isPhotoPickerUri(uri) && LOCAL_PICKER_PROVIDER !in uri.pathSegments) {
+            Timber.d("Not trashing cloud picker item '%s'", uri)
+            return null
+        }
         val mediaUri = if (uri.authority == MediaStore.AUTHORITY) {
             uri
         } else {
-            try {
+            embeddedMediaUri(uri) ?: try {
                 MediaStore.getMediaUri(this, uri)
             } catch (e: Exception) {
                 null
@@ -407,6 +464,14 @@ class HandleMediaActivity : AppCompatActivity() {
             else -> null
         } ?: return null
         return ContentUris.withAppendedId(collection, id)
+    }
+
+    // google photos (the gallery on many phones) shares its own uri with the phone's MediaStore uri inside:
+    // content://com.google.android.apps.photos.contentprovider/-1/1/content%3A%2F%2Fmedia%2F...%2F67/REQUIRE_ORIGINAL/...
+    // photos that are only in the cloud have no such part and stay untouched
+    private fun embeddedMediaUri(uri: Uri): Uri? = uri.pathSegments.firstNotNullOfOrNull { segment ->
+        if (!segment.startsWith("content://")) return@firstNotNullOfOrNull null
+        Uri.parse(segment).takeIf { it.authority == MediaStore.AUTHORITY && !utils.isPhotoPickerUri(it) }
     }
 
     private fun shareMedia(mediaUris: ArrayList<Uri>) {
@@ -431,6 +496,11 @@ class HandleMediaActivity : AppCompatActivity() {
             shareIntent.setDataAndType(mediaUri, contentResolver.getType(mediaUri))
         }
 
+        // the read grant travels with the clip data, android 18 stops adding it on its own for shares
+        val clip = android.content.ClipData.newRawUri(null, mediaUris[0])
+        mediaUris.drop(1).forEach { clip.addItem(android.content.ClipData.Item(it)) }
+        shareIntent.clipData = clip
+
         val chooser = Intent.createChooser(shareIntent, "media")
         startActivity(chooser)
     }
@@ -453,5 +523,12 @@ class HandleMediaActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_FROM_NOTIFICATION = "from_notification"
         private const val BIGGEST_SAVINGS_COUNT = 5
+        private const val STATE_NEW_BATCH = "new_batch"
+        private const val LOCAL_PICKER_PROVIDER = "com.android.providers.media.photopicker"
+
+        // this screen lives in a task hidden from recents, the main screen uses this to offer a way back
+        enum class BatchState { NONE, RUNNING, FINISHED }
+        @Volatile var openBatch = BatchState.NONE
+            private set
     }
 }

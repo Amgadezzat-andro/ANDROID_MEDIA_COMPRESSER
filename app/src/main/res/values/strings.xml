@@ -1,7 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">FFShare</string>
-    <!-- launcher and title name, different from the original FFShare so both can sit side by side -->
-    <string name="app_label" translatable="false">FFShare+</string>
+    <!-- launcher and title name, a fork of FFShare (see credits on the main screen), installs next to the original -->
+    <string name="app_label" translatable="false">Nothing Media Compressor</string>
     <string name="error_cannot_read" tools:ignore="MissingTranslation">Couldn\'t open this file. It may be cloud-only or no longer exist</string>
     <string name="menu_item_settings">Settings</string>
     <string name="menu_item_logs">Logs</string>
@@ -30,12 +30,13 @@
     <string name="flavor" tools:ignore="MissingTranslation">Flavor: %s</string>
 
 
-    <string name="app_description">Compress images and videos through ffmpeg before sharing them</string>
+    <string name="app_description">Make photos and videos smaller and get your storage back</string>
     <string name="introduction_line_0">App Created by caydey <a href="https://github.com/caydey/ffshare">github</a></string>
     <string name="introduction_line_1">Functionality (and code) inspired by Scrambled-Exif by juanitobananas <a href="https://gitlab.com/juanitobananas/scrambled-exif">gitlab</a></string>
     <string name="introduction_line_2">FFmpeg library used is ffmpeg-kit-next by arthenica <a href="https://github.com/arthenica/ffmpeg-kit-next">github</a></string>
 
-    <string name="select_file_button" tools:ignore="MissingTranslation">Select files</string>
+    <string name="select_file_button" tools:ignore="MissingTranslation">Select photos &amp; videos</string>
+    <string name="browse_files_button" tools:ignore="MissingTranslation">Browse files: audio, or more than %1$d at once</string>
 
     <string name="ffmpeg_command">ffmpeg command running:</string>
     <string name="input_file">Input file:</string>
@@ -114,6 +115,7 @@
 
     <!-- Quality presets & save folder -->
     <string name="quality_title" tools:ignore="MissingTranslation">Quality</string>
+    <string name="preset_ultra" tools:ignore="MissingTranslation">Ultra</string>
     <string name="preset_max_compression" tools:ignore="MissingTranslation">Smallest</string>
     <string name="preset_balanced" tools:ignore="MissingTranslation">Balanced</string>
     <string name="preset_high_quality" tools:ignore="MissingTranslation">Best quality</string>
@@ -122,11 +124,58 @@
     <string name="preset_balanced_summary" tools:ignore="MissingTranslation">H.265 1080p video · WebP 1440p images. Recommended</string>
     <string name="preset_high_quality_summary" tools:ignore="MissingTranslation">H.265 full resolution video · high quality original format images</string>
     <string name="preset_custom_summary" tools:ignore="MissingTranslation">Your own settings from the Settings screen</string>
+    <!-- swipeable preset cards on the main screen -->
+    <string name="preset_recommended" tools:ignore="MissingTranslation">Recommended</string>
+    <string name="preset_in_use" tools:ignore="MissingTranslation">In use</string>
+    <string name="preset_swipe_hint" tools:ignore="MissingTranslation">Swipe to change</string>
+    <string name="preset_ultra_tagline" tools:ignore="MissingTranslation">As small as it gets. Clearly softer, for archives you rarely open</string>
+    <string name="preset_max_compression_tagline" tools:ignore="MissingTranslation">Saves the most space. Fine for chats and viewing on a phone</string>
+    <string name="preset_balanced_tagline" tools:ignore="MissingTranslation">Looks the same on a phone screen, takes far less space</string>
+    <string name="preset_high_quality_tagline" tools:ignore="MissingTranslation">Full resolution, almost no visible loss. Saves the least</string>
+    <string name="preset_custom_tagline" tools:ignore="MissingTranslation">Your own codec, resolution and quality</string>
+    <string name="preset_ultra_spec" tools:ignore="MissingTranslation">Video H.265 480p · photos 720p</string>
+    <string name="preset_max_compression_spec" tools:ignore="MissingTranslation">Video H.265 720p · photos 1080p</string>
+    <string name="preset_balanced_spec" tools:ignore="MissingTranslation">Video H.265 1080p · photos 1440p</string>
+    <string name="preset_high_quality_spec" tools:ignore="MissingTranslation">Video H.265 full size · photos full size</string>
+    <string name="preset_custom_spec" tools:ignore="MissingTranslation">Set in Settings, changing any option there picks this card</string>
+    <string name="preset_example_title" tools:ignore="MissingTranslation">Typical result</string>
+    <string name="preset_ultra_example" tools:ignore="MissingTranslation">12 MP photo: 4 MB → about 0.05 MB\n1 min of 1080p video: 130 MB → about 4 MB</string>
+    <string name="preset_max_compression_example" tools:ignore="MissingTranslation">12 MP photo: 4 MB → about 0.2 MB\n1 min of 1080p video: 130 MB → about 10 MB</string>
+    <string name="preset_balanced_example" tools:ignore="MissingTranslation">12 MP photo: 4 MB → about 0.5 MB\n1 min of 1080p video: 130 MB → about 30 MB</string>
+    <string name="preset_high_quality_example" tools:ignore="MissingTranslation">12 MP photo: 4 MB → about 2.5 MB\n1 min of 1080p video: 130 MB → about 55 MB</string>
+    <string name="preset_custom_example" tools:ignore="MissingTranslation">Depends on your settings</string>
+    <string name="preset_open_settings" tools:ignore="MissingTranslation">Open settings</string>
+    <string name="preset_dot_description" tools:ignore="MissingTranslation">Use %1$s</string>
+    <!-- photo format, separate from the presets -->
+    <string name="settings_photo_format" tools:ignore="MissingTranslation">Photo format</string>
+    <string name="photo_format_title" tools:ignore="MissingTranslation">Photo format</string>
+    <string name="photo_format_webp" tools:ignore="MissingTranslation">WebP</string>
+    <string name="photo_format_original" tools:ignore="MissingTranslation">Keep original</string>
+    <string name="photo_format_webp_hint" tools:ignore="MissingTranslation">Smallest photos. Sizes on the cards are for WebP</string>
+    <string name="photo_format_original_hint" tools:ignore="MissingTranslation">A JPEG stays a JPEG, works in every app but saves less than on the cards</string>
+    <string name="photo_format_other_hint" tools:ignore="MissingTranslation">Converting to %1$s, set in Settings</string>
+
+    <string name="location_permission_title" tools:ignore="MissingTranslation">Keep where your photos were taken?</string>
+    <string name="location_permission_body" tools:ignore="MissingTranslation">Android hides the location inside photos from apps unless you allow photo access. Allow it and the smaller copies keep their location, so they still show up on the map in your gallery. Nothing leaves your phone.\n\nPick \"Allow all\" on the next screen. Asked only once.</string>
+    <string name="location_permission_continue" tools:ignore="MissingTranslation">Continue</string>
+    <string name="location_permission_skip" tools:ignore="MissingTranslation">Skip</string>
+    <string name="details_command" tools:ignore="MissingTranslation">Command</string>
+    <string name="details_input" tools:ignore="MissingTranslation">In</string>
+    <string name="details_output" tools:ignore="MissingTranslation">Out</string>
+    <string name="details_progress" tools:ignore="MissingTranslation">Video</string>
+    <string name="open_batch_running" tools:ignore="MissingTranslation">Compressing in the background. Tap to see the progress</string>
+    <string name="open_batch_finished" tools:ignore="MissingTranslation">Your results are ready. Tap to see them</string>
 
     <string name="save_to_title" tools:ignore="MissingTranslation">Save to</string>
-    <string name="save_to_not_set" tools:ignore="MissingTranslation">No folder chosen. The share menu opens after compressing</string>
+    <string name="save_to_not_set" tools:ignore="MissingTranslation">The share menu opens after compressing, nothing is saved</string>
     <string name="save_to_choose" tools:ignore="MissingTranslation">Choose folder</string>
     <string name="save_to_clear" tools:ignore="MissingTranslation">Share instead</string>
+    <string name="save_to_change" tools:ignore="MissingTranslation">Change</string>
+    <string name="save_to_on" tools:ignore="MissingTranslation">On</string>
+    <string name="save_to_off" tools:ignore="MissingTranslation">Off</string>
+    <string name="save_to_none" tools:ignore="MissingTranslation">No folder</string>
+    <string name="save_to_path" tools:ignore="MissingTranslation">%1$s · originals stay until you free up space</string>
+    <string name="action_about" tools:ignore="MissingTranslation">About</string>
 
     <plurals name="files_failed_message" tools:ignore="MissingTranslation">
         <item quantity="one">%d file couldn\'t be compressed</item>

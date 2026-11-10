@@ -120,7 +120,9 @@ class CompressionService : Service() {
         }
 
         private fun openAppIntent(context: Context): PendingIntent {
+            // back to the main screen the app already has open, not a second one on top of it
             val intent = Intent(context, MainActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
             return PendingIntent.getActivity(context, 1, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         }
 

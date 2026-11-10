@@ -8,6 +8,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- without it android blanks the location in photos it hands over, "keep photo date and location" needs it -->
+    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
 
     <application
         android:name=".App"
@@ -49,11 +51,13 @@
             android:exported="false"
             android:theme="@style/Theme.FFShare.NoActionBar" />
         <!-- own task so it can be sent to the background and brought back from the notification.
+             never recreated (dark mode at night, font size, ...): a recreated screen would start the batch again.
              the share menu reaches it through the two aliases below -->
         <activity
             android:name=".HandleMediaActivity"
             android:excludeFromRecents="true"
             android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|uiMode|density|fontScale|keyboard|keyboardHidden|navigation|locale|layoutDirection"
             android:launchMode="singleTask"
             android:taskAffinity="com.caydey.ffshare.compress"
             android:theme="@style/Theme.FFShare.NoActionBar"

@@ -1,3 +1,8 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
+    <!-- preset cards: the current card lines up with the other cards (16dp from the edge),
+         the gap leaves the neighbours peeking in by side padding minus gap -->
+    <dimen name="preset_card_side_padding">16dp</dimen>
+    <dimen name="preset_card_gap">8dp</dimen>
+    <dimen name="preset_dot_touch_size">24dp</dimen>
 </resources>

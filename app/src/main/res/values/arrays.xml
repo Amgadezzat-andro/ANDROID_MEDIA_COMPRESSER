@@ -190,10 +190,11 @@
         <item>Small (30)</item>
         <item>Smaller (32)</item>
         <item>Smallest, visible loss (35)</item>
+        <item>Tiny, heavy loss (38)</item>
     </string-array>
     <string-array name="settings_video_crf_plain_values" translatable="false">
         <item>18</item><item>20</item><item>23</item><item>26</item>
-        <item>28</item><item>30</item><item>32</item><item>35</item>
+        <item>28</item><item>30</item><item>32</item><item>35</item><item>38</item>
     </string-array>
 
     <string-array name="settings_jpeg_quality_plain" tools:ignore="MissingTranslation">
@@ -256,12 +257,14 @@
     </string-array>
 
     <string-array name="settings_quality_preset" tools:ignore="MissingTranslation">
+        <item>@string/preset_ultra</item>
         <item>@string/preset_max_compression</item>
         <item>@string/preset_balanced</item>
         <item>@string/preset_high_quality</item>
         <item>@string/preset_custom</item>
     </string-array>
     <string-array name="settings_quality_preset_values" translatable="false">
+        <item>ULTRA</item>
         <item>MAX_COMPRESSION</item>
         <item>BALANCED</item>
         <item>HIGH_QUALITY</item>

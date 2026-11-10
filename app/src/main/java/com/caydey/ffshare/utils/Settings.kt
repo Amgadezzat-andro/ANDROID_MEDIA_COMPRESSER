@@ -52,15 +52,25 @@ class Settings(private val context: Context) {
         }
     }
 
-    // one-tap presets, each one overwrites the compression settings below
+    // one-tap presets, each one overwrites the compression settings below. the photo format (webp or
+    // the original's) is a choice of its own, so every preset sets both a webp and a jpeg quality
     enum class QualityPreset(val values: Map<String, String>) {
+        ULTRA(mapOf(
+            VIDEO_CODEC to VideoCodecOpts.H265.name,
+            VIDEO_CRF to "38",
+            COMPRESSION_PRESET to "slow",
+            MAX_VIDEO_RESOLUTION to "480",
+            WEBP_QUALITY to "40",
+            JPEG_QSCALE to "20",
+            MAX_IMAGE_RESOLUTION to "720"
+        )),
         MAX_COMPRESSION(mapOf(
             VIDEO_CODEC to VideoCodecOpts.H265.name,
             VIDEO_CRF to "32",
             COMPRESSION_PRESET to "slow",
             MAX_VIDEO_RESOLUTION to "720",
-            CONVERT_IMAGE_OUTPUT to Utils.MediaType.WEBP.name,
             WEBP_QUALITY to "60",
+            JPEG_QSCALE to "15",
             MAX_IMAGE_RESOLUTION to "1080"
         )),
         BALANCED(mapOf(
@@ -68,8 +78,8 @@ class Settings(private val context: Context) {
             VIDEO_CRF to "28",
             COMPRESSION_PRESET to "medium",
             MAX_VIDEO_RESOLUTION to "1080",
-            CONVERT_IMAGE_OUTPUT to Utils.MediaType.WEBP.name,
             WEBP_QUALITY to "75",
+            JPEG_QSCALE to "6",
             MAX_IMAGE_RESOLUTION to "1440"
         )),
         HIGH_QUALITY(mapOf(
@@ -77,7 +87,7 @@ class Settings(private val context: Context) {
             VIDEO_CRF to "23",
             COMPRESSION_PRESET to "medium",
             MAX_VIDEO_RESOLUTION to "0",
-            CONVERT_IMAGE_OUTPUT to Utils.MediaType.UNKNOWN.name,
+            WEBP_QUALITY to "90",
             JPEG_QSCALE to "2",
             MAX_IMAGE_RESOLUTION to "0"
         )),
@@ -114,6 +124,11 @@ class Settings(private val context: Context) {
     var onboardingDone: Boolean
         get() = preferences.getBoolean(ONBOARDING_DONE, false)
         set(value) = setPreference(ONBOARDING_DONE, value)
+
+    // asked once for photo locations before the first batch, either answer is final
+    var mediaLocationAsked: Boolean
+        get() = preferences.getBoolean(MEDIA_LOCATION_ASKED, false)
+        set(value) = setPreference(MEDIA_LOCATION_ASKED, value)
 
     // settings screen shows only the basics until this is turned on
     var showAdvancedSettings: Boolean
@@ -163,9 +178,9 @@ class Settings(private val context: Context) {
             return Utils.MediaType.valueOf(preferencesString) // convert string to enum
         }
         set(value) = setPreference(COMPRESSED_MEDIA_NAME, value.toString())
-    var imageConversionOutput: Utils.MediaType // UNKNOWN for original
+    var imageConversionOutput: Utils.MediaType // UNKNOWN keeps the original format, webp unless the user picks that
         get() {
-            val preferencesString = preferences.getString(CONVERT_IMAGE_OUTPUT, Utils.MediaType.UNKNOWN.name)!!
+            val preferencesString = preferences.getString(CONVERT_IMAGE_OUTPUT, Utils.MediaType.WEBP.name)!!
             return Utils.MediaType.valueOf(preferencesString) // convert string to enum
         }
         set(value) = setPreference(CONVERT_IMAGE_OUTPUT, value.toString())
@@ -285,6 +300,7 @@ class Settings(private val context: Context) {
         const val KEEP_ORIGINAL_IF_BIGGER = "pref_keep_original_if_bigger"
         const val HARDWARE_VIDEO = "pref_hardware_video"
         const val ONBOARDING_DONE = "onboarding_done"
+        const val MEDIA_LOCATION_ASKED = "media_location_asked"
         const val SHOW_ADVANCED_SETTINGS = "pref_show_advanced"
         const val STATS_FILES = "stats_files"
         const val STATS_INPUT_BYTES = "stats_input_bytes"
