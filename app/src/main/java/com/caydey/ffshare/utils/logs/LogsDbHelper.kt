@@ -73,10 +73,20 @@ class LogsDbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, 
         return logs
     }
 
+    // photos finish on several threads at once, one writer at a time keeps the count and the pruning
+    // consistent, and a log that can't be written must never take a compression down with it
+    @Synchronized
     fun addLog(log: Log) {
         // only save logs if enabled in settings
         if (!settings.saveLogs) return
+        try {
+            insertLog(log)
+        } catch (e: Exception) {
+            Timber.e(e, "Unable to save log")
+        }
+    }
 
+    private fun insertLog(log: Log) {
         Timber.d("saving log to sqlite database")
 
         val contentValues = ContentValues()

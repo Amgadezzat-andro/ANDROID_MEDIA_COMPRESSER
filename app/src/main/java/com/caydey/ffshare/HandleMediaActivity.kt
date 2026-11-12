@@ -106,7 +106,6 @@ class HandleMediaActivity : AppCompatActivity() {
                 }
             }
         })
-        findViewById<Button>(R.id.btnBackground).setOnClickListener { moveTaskToBack(true) }
 
         val detailsContainer = findViewById<View>(R.id.detailsContainer)
         val detailsToggle = findViewById<TextView>(R.id.lblDetailsToggle)
@@ -199,6 +198,11 @@ class HandleMediaActivity : AppCompatActivity() {
                 Intent.ACTION_SEND_MULTIPLE -> intent.parcelableArrayList<Uri>(Intent.EXTRA_STREAM) ?: ArrayList()
                 else -> ArrayList<Uri>()
             }
+        // debug builds only: adb can start a batch for a whole folder without the picker,
+        // am start -a android.intent.action.SEND_MULTIPLE --es debug_folder DCIM/T/ -n <pkg>/com.caydey.ffshare.CompressAndSave
+        if (BuildConfig.DEBUG) {
+            intent.getStringExtra(DEBUG_FOLDER)?.let { receivedMedia.addAll(DebugBatch.urisIn(this, it)) }
+        }
 
         // unable to get file from intent
         if (receivedMedia.isEmpty()) {
@@ -523,6 +527,7 @@ class HandleMediaActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_FROM_NOTIFICATION = "from_notification"
         private const val BIGGEST_SAVINGS_COUNT = 5
+        private const val DEBUG_FOLDER = "debug_folder"
         private const val STATE_NEW_BATCH = "new_batch"
         private const val LOCAL_PICKER_PROVIDER = "com.android.providers.media.photopicker"
 

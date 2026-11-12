@@ -173,6 +173,8 @@ class MediaCompressor(private val context: Context) {
         val session = FFmpegKit.executeAsync(command, { session ->
             // completed
             if (!settled.compareAndSet(false, true)) return@executeAsync // the watchdog already moved on
+            // anything thrown here would leave this file unfinished forever (or close the app), it just fails
+            try {
             localInput?.delete()
             if (session.getReturnCode()?.isValueSuccess() == false) { // failed
                 if (session.getReturnCode()?.isValueCancel() == true) {
@@ -234,6 +236,11 @@ class MediaCompressor(private val context: Context) {
                 ))
                 // callback
                 successHandler(outputFileUri, outputFile, inputFileSize, outputFileCurrentSize)
+            }
+            } catch (e: Exception) {
+                Timber.e(e, "Unable to finish '%s'", inputFileName)
+                outputFile.parentFile?.deleteRecursively()
+                failureHandler(context.getString(R.string.ffmpeg_error))
             }
         }, { /* logs */ }, { statistics ->
             val mark = statistics.videoFrameNumber.toLong() + statistics.size
@@ -438,7 +445,20 @@ class MediaCompressor(private val context: Context) {
         // the image workers. once its videos are done that lane helps with the images.
         // off the main thread, checking thousands of files takes a moment
         thread(name = "compress-start") {
-            val (images, serial) = inputFilesUri.partition { isImage(it) }
+            // thousands of files take a moment to sort, show it instead of a frozen "getting ready"
+            val images = ArrayList<Uri>()
+            val serial = ArrayList<Uri>()
+            inputFilesUri.forEachIndexed { i, uri ->
+                if (isImage(uri)) images.add(uri) else serial.add(uri)
+                if (inputFilesCount > CHECKING_PROGRESS_MIN && (i % CHECKING_PROGRESS_STEP == 0 || i == inputFilesCount - 1)) {
+                    val checked = i + 1
+                    mainHandler.post {
+                        txtEta.text = context.getString(R.string.progress_checking, checked, inputFilesCount)
+                        progressBar.setProgressCompat(checked * 1000 / inputFilesCount, false)
+                    }
+                }
+            }
+            mainHandler.post { progressBar.setProgressCompat(0, false); txtEta.setText(R.string.eta_estimating) }
             val nextImage = AtomicInteger(0)
             val nextSerial = AtomicInteger(0)
             var imageWorkers = if (images.size <= 1) images.size else (Runtime.getRuntime().availableProcessors() / 2).coerceIn(1, 4)
@@ -529,6 +549,9 @@ class MediaCompressor(private val context: Context) {
         private const val THUMBNAIL_SIZE = 400
         // the first seconds are too noisy to estimate time left from
         private const val MIN_ETA_ELAPSED = 5_000L
+        // big batches show "checking files x of y" while they are sorted into photos and videos
+        private const val CHECKING_PROGRESS_MIN = 50
+        private const val CHECKING_PROGRESS_STEP = 25
         // a hardware encoder that reports no progress for this long is stuck
         private const val HARDWARE_STALL_TIMEOUT = 30_000L
         private const val STALL_CHECK_INTERVAL = 2_000L
@@ -553,7 +576,8 @@ class MediaCompressor(private val context: Context) {
         val mime = context.contentResolver.getType(uri)
         return when {
             mime == null || mime == "application/octet-stream" -> utils.isImage(utils.getMediaType(uri))
-            else -> mime.startsWith("image/") && utils.isImage(utils.getMediaType(uri))
+            // a photo type we can't read fails before it touches saf, so the mime type alone is enough here
+            else -> mime.startsWith("image/")
         }
     }
 

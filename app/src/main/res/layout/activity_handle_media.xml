@@ -72,27 +72,24 @@
                     android:scaleType="centerCrop" />
             </com.google.android.material.card.MaterialCardView>
 
-            <LinearLayout
+            <!-- no "run in background" button: leaving this screen any way keeps the batch going -->
+            <TextView
+                android:id="@+id/lblBackgroundHint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:alpha="0.7"
+                android:gravity="center"
+                android:text="@string/progress_background_hint"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/btnCancel"
+                style="@style/Widget.Nothing.Button.Outlined"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/btnBackground"
-                    style="@style/Widget.Nothing.Button.Outlined"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/progress_background" />
-
-                <Button
-                    android:id="@+id/btnCancel"
-                    style="@style/Widget.Nothing.Button.Text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="@string/cancel_ffmpeg" />
-            </LinearLayout>
+                android:layout_marginTop="12dp"
+                android:text="@string/cancel_ffmpeg" />
 
             <TextView
                 android:id="@+id/lblDetailsToggle"

@@ -256,10 +256,11 @@
 
     <!-- Progress screen -->
     <string name="progress_starting" tools:ignore="MissingTranslation">Getting ready…</string>
+    <string name="progress_checking" tools:ignore="MissingTranslation">Checking files · %1$,d of %2$,d</string>
     <string name="progress_single" tools:ignore="MissingTranslation">Compressing…</string>
     <string name="progress_x_of_y" tools:ignore="MissingTranslation">%1$,d of %2$,d</string>
     <string name="progress_thumbnail" tools:ignore="MissingTranslation">File being compressed</string>
-    <string name="progress_background" tools:ignore="MissingTranslation">Run in background</string>
+    <string name="progress_background_hint" tools:ignore="MissingTranslation">You can leave this screen, it keeps going in the background</string>
     <string name="progress_details_show" tools:ignore="MissingTranslation">Technical details ▾</string>
     <string name="progress_details_hide" tools:ignore="MissingTranslation">Hide details ▴</string>
     <string name="eta_estimating" tools:ignore="MissingTranslation">Working out time left…</string>

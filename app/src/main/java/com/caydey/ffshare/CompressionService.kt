@@ -18,6 +18,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.caydey.ffshare.utils.Utils
+import timber.log.Timber
 
 // keeps the app alive (and the cpu awake) while a batch compresses, so the user can leave the app
 class CompressionService : Service() {
@@ -26,12 +27,26 @@ class CompressionService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        isRunning = true
         val notification = progressNotification(this, getString(R.string.notification_starting), 0, 0)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(PROGRESS_NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
-        } else {
-            startForeground(PROGRESS_NOTIFICATION_ID, notification)
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(PROGRESS_NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+            } else {
+                startForeground(PROGRESS_NOTIFICATION_ID, notification)
+            }
+        } catch (e: Exception) {
+            // battery saver or a used up background time budget can refuse it. the batch still runs while
+            // the app is open, it just can't keep going in the background
+            Timber.e(e, "Foreground service refused")
+            stopSelf()
+            return START_NOT_STICKY
+        }
+        isRunning = true
+        // a small batch can finish before android gets this service going (slow phone, battery saver).
+        // it was asked to stop while starting, which only works now that startForeground has been called
+        if (!batchActive) {
+            stopSelf()
+            return START_NOT_STICKY
         }
         if (wakeLock == null) {
             val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
@@ -62,12 +77,26 @@ class CompressionService : Service() {
         @Volatile var isRunning = false
             private set
 
+        // false once the batch ended, a service still starting up then stops itself right away
+        @Volatile private var batchActive = false
+
         fun start(context: Context) {
-            ContextCompat.startForegroundService(context, Intent(context, CompressionService::class.java))
+            batchActive = true
+            try {
+                ContextCompat.startForegroundService(context, Intent(context, CompressionService::class.java))
+            } catch (e: Exception) {
+                // not allowed right now (e.g. app not in front), compressing works without it
+                Timber.e(e, "Unable to start compression service")
+            }
         }
 
+        // stopping a service that hasn't called startForeground yet crashes the app, so one that is still
+        // starting is only flagged and stops itself in onStartCommand
         fun stop(context: Context) {
-            context.stopService(Intent(context, CompressionService::class.java))
+            batchActive = false
+            if (isRunning) {
+                context.stopService(Intent(context, CompressionService::class.java))
+            }
         }
 
         fun updateProgress(context: Context, done: Int, total: Int, savedBytes: Long, timeLeft: String?) {
