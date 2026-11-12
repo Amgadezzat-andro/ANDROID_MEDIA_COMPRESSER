@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- app themes picked in settings, applied over Theme.FFShare (the nothing theme) by AppTheme.apply.
+     colours have light and dark versions in values(-night)/colors_themes.xml -->
+<resources>
+
+    <!-- One UI style: system font (One UI Sans on samsung phones), sentence case, very round cards, blue -->
+    <style name="ThemeOverlay.NMC.OneUi" parent="">
+        <item name="nmcHeroNumber">@color/oneui_on_primary</item>
+        <item name="colorPrimary">@color/oneui_primary</item>
+        <item name="colorPrimaryVariant">@color/oneui_primary</item>
+        <item name="colorOnPrimary">@color/oneui_on_primary</item>
+        <item name="colorSecondary">@color/oneui_accent</item>
+        <item name="colorSurface">@color/oneui_surface</item>
+        <item name="colorOnSurface">@color/oneui_text</item>
+        <item name="android:colorBackground">@color/oneui_background</item>
+        <item name="android:textColor">@color/oneui_text</item>
+        <item name="android:textColorSecondary">@color/oneui_text_secondary</item>
+        <item name="android:statusBarColor">@color/oneui_background</item>
+        <item name="nmcDisplayFont">sans-serif-medium</item>
+        <item name="nmcLabelFont">sans-serif-medium</item>
+        <item name="nmcButtonFont">sans-serif-medium</item>
+        <item name="nmcMonoFont">monospace</item>
+        <item name="nmcLabelCaps">false</item>
+        <item name="nmcButtonCaps">false</item>
+        <item name="nmcLabelSpacing">0</item>
+        <item name="nmcCardRadius">26dp</item>
+        <item name="nmcButtonRadius">28dp</item>
+        <item name="nmcSmallButtonRadius">20dp</item>
+    </style>
+
+    <!-- Material You: android's own look, colours from the wallpaper on android 12+ -->
+    <style name="ThemeOverlay.NMC.Android" parent="">
+        <item name="nmcHeroNumber">@color/android_on_primary</item>
+        <item name="colorPrimary">@color/android_primary</item>
+        <item name="colorPrimaryVariant">@color/android_primary</item>
+        <item name="colorOnPrimary">@color/android_on_primary</item>
+        <item name="colorSecondary">@color/android_accent</item>
+        <item name="colorSurface">@color/android_surface</item>
+        <item name="colorOnSurface">@color/android_text</item>
+        <item name="android:colorBackground">@color/android_background</item>
+        <item name="android:textColor">@color/android_text</item>
+        <item name="android:textColorSecondary">@color/android_text_secondary</item>
+        <item name="android:statusBarColor">@color/android_background</item>
+        <item name="nmcDisplayFont">sans-serif</item>
+        <item name="nmcLabelFont">sans-serif-medium</item>
+        <item name="nmcButtonFont">sans-serif-medium</item>
+        <item name="nmcMonoFont">monospace</item>
+        <item name="nmcLabelCaps">false</item>
+        <item name="nmcButtonCaps">false</item>
+        <item name="nmcLabelSpacing">0.01</item>
+        <item name="nmcCardRadius">16dp</item>
+        <item name="nmcButtonRadius">20dp</item>
+        <item name="nmcSmallButtonRadius">20dp</item>
+    </style>
+
+    <!-- Midnight: pure black for OLED screens day and night, monospace, green accent -->
+    <style name="ThemeOverlay.NMC.Midnight" parent="">
+        <item name="nmcHeroNumber">@color/midnight_accent</item>
+        <item name="colorPrimary">@color/midnight_primary</item>
+        <item name="colorPrimaryVariant">@color/midnight_primary</item>
+        <item name="colorOnPrimary">@color/midnight_on_primary</item>
+        <item name="colorSecondary">@color/midnight_accent</item>
+        <item name="colorSurface">@color/midnight_surface</item>
+        <item name="colorOnSurface">@color/midnight_text</item>
+        <item name="android:colorBackground">@color/midnight_background</item>
+        <item name="android:textColor">@color/midnight_text</item>
+        <item name="android:textColorSecondary">@color/midnight_text_secondary</item>
+        <item name="android:statusBarColor">@color/midnight_background</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="nmcDisplayFont">@font/space_mono_bold</item>
+        <item name="nmcLabelFont">@font/space_mono</item>
+        <item name="nmcButtonFont">@font/space_mono_bold</item>
+        <item name="nmcMonoFont">@font/space_mono</item>
+        <item name="nmcLabelCaps">true</item>
+        <item name="nmcButtonCaps">true</item>
+        <item name="nmcLabelSpacing">0.08</item>
+        <item name="nmcCardRadius">14dp</item>
+        <item name="nmcButtonRadius">12dp</item>
+        <item name="nmcSmallButtonRadius">12dp</item>
+    </style>
+
+    <!-- Classic: the original FFShare teal -->
+    <style name="ThemeOverlay.NMC.Classic" parent="">
+        <item name="nmcHeroNumber">@color/classic_on_primary</item>
+        <item name="colorPrimary">@color/classic_primary</item>
+        <item name="colorPrimaryVariant">@color/classic_primary</item>
+        <item name="colorOnPrimary">@color/classic_on_primary</item>
+        <item name="colorSecondary">@color/classic_accent</item>
+        <item name="colorSurface">@color/classic_surface</item>
+        <item name="colorOnSurface">@color/classic_text</item>
+        <item name="android:colorBackground">@color/classic_background</item>
+        <item name="android:textColor">@color/classic_text</item>
+        <item name="android:textColorSecondary">@color/classic_text_secondary</item>
+        <item name="android:statusBarColor">@color/classic_background</item>
+        <item name="nmcDisplayFont">sans-serif-condensed</item>
+        <item name="nmcLabelFont">sans-serif-medium</item>
+        <item name="nmcButtonFont">sans-serif-medium</item>
+        <item name="nmcMonoFont">monospace</item>
+        <item name="nmcLabelCaps">true</item>
+        <item name="nmcButtonCaps">true</item>
+        <item name="nmcLabelSpacing">0.05</item>
+        <item name="nmcCardRadius">8dp</item>
+        <item name="nmcButtonRadius">6dp</item>
+        <item name="nmcSmallButtonRadius">6dp</item>
+    </style>
+</resources>

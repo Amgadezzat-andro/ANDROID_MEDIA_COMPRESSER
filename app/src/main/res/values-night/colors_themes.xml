@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- app theme colours (dark), midnight is the same day and night -->
+<resources>
+    <color name="oneui_primary">#3E91FF</color>
+    <color name="oneui_on_primary">#FFFFFF</color>
+    <color name="oneui_accent">#3E91FF</color>
+    <color name="oneui_surface">#1C1C1E</color>
+    <color name="oneui_background">#000000</color>
+    <color name="oneui_text">#F5F5F5</color>
+    <color name="oneui_text_secondary">#9C9CA1</color>
+    <color name="android_primary">#D0BCFF</color>
+    <color name="android_on_primary">#381E72</color>
+    <color name="android_accent">#EFB8C8</color>
+    <color name="android_surface">#211F26</color>
+    <color name="android_background">#141218</color>
+    <color name="android_text">#E6E0E9</color>
+    <color name="android_text_secondary">#CAC4D0</color>
+    <color name="classic_primary">#4DB6AC</color>
+    <color name="classic_on_primary">#00201C</color>
+    <color name="classic_accent">#4DB6AC</color>
+    <color name="classic_surface">#1E1E1E</color>
+    <color name="classic_background">#121212</color>
+    <color name="classic_text">#F1F1F1</color>
+    <color name="classic_text_secondary">#A6B2AF</color>
+</resources>

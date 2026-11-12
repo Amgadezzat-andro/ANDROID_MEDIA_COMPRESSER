@@ -11,6 +11,11 @@ class PreferencesFragment : PreferenceFragmentCompat() {
         dynamicallyAddCustomParamTooltips()
         linkQualityPreset()
         toggleAdvancedSettings()
+        // a new look shows right away, the main screen rebuilds itself when you go back
+        findPreference<ListPreference>(Settings.APP_THEME)?.setOnPreferenceChangeListener { _, _ ->
+            view?.post { activity?.recreate() }
+            true
+        }
     }
     private fun toggleAdvancedSettings() {
         val advancedCategories = arrayOf("prefs_photos", "prefs_videos", "prefs_files", "prefs_custom_params")

@@ -270,4 +270,18 @@
         <item>HIGH_QUALITY</item>
         <item>CUSTOM</item>
     </string-array>
+    <string-array name="settings_app_theme" tools:ignore="MissingTranslation">
+        <item>Nothing (dot matrix, red)</item>
+        <item>One UI style (round, blue)</item>
+        <item>Material You (wallpaper colours)</item>
+        <item>Midnight (pure black)</item>
+        <item>Classic (FFShare teal)</item>
+    </string-array>
+    <string-array name="settings_app_theme_values" translatable="false">
+        <item>NOTHING</item>
+        <item>ONE_UI</item>
+        <item>MATERIAL_YOU</item>
+        <item>MIDNIGHT</item>
+        <item>CLASSIC</item>
+    </string-array>
 </resources>

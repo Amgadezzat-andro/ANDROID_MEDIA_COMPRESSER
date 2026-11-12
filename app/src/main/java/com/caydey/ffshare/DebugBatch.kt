@@ -6,7 +6,7 @@ import android.net.Uri
 import android.provider.MediaStore
 
 // test hook for debug builds: every photo, video and audio file in one folder, so a batch can be started
-// from adb in one command. needs the read-media permissions only the debug manifest declares
+// from adb in one command. adb grants the read-media permissions the storage tracker declares
 object DebugBatch {
     fun urisIn(context: Context, relativePath: String): List<Uri> {
         val uris = ArrayList<Uri>()

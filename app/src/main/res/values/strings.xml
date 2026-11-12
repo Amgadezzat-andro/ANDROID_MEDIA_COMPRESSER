@@ -147,6 +147,7 @@
     <string name="preset_open_settings" tools:ignore="MissingTranslation">Open settings</string>
     <string name="preset_dot_description" tools:ignore="MissingTranslation">Use %1$s</string>
     <!-- photo format, separate from the presets -->
+    <string name="settings_app_theme" tools:ignore="MissingTranslation">Theme</string>
     <string name="settings_photo_format" tools:ignore="MissingTranslation">Photo format</string>
     <string name="photo_format_title" tools:ignore="MissingTranslation">Photo format</string>
     <string name="photo_format_webp" tools:ignore="MissingTranslation">WebP</string>
@@ -163,6 +164,28 @@
     <string name="details_input" tools:ignore="MissingTranslation">In</string>
     <string name="details_output" tools:ignore="MissingTranslation">Out</string>
     <string name="details_progress" tools:ignore="MissingTranslation">Video</string>
+    <!-- storage tracker -->
+    <string name="back" tools:ignore="MissingTranslation">Back</string>
+    <string name="storage_title" tools:ignore="MissingTranslation">Storage</string>
+    <string name="storage_card_title" tools:ignore="MissingTranslation">Storage</string>
+    <string name="storage_card_hint" tools:ignore="MissingTranslation">See what takes space on your phone</string>
+    <string name="storage_card_summary" tools:ignore="MissingTranslation">Photos %1$s · Videos %2$s · Audio %3$s</string>
+    <string name="storage_permission_title" tools:ignore="MissingTranslation">See what takes space</string>
+    <string name="storage_permission_body" tools:ignore="MissingTranslation">To add up your photos, videos and audio the app needs to read your media library. It only looks at sizes and folders, nothing leaves your phone.</string>
+    <string name="storage_permission_allow" tools:ignore="MissingTranslation">Allow</string>
+    <string name="storage_scanning" tools:ignore="MissingTranslation">Adding up your media…</string>
+    <string name="storage_media_title" tools:ignore="MissingTranslation">Photos, videos and audio</string>
+    <string name="storage_device_line" tools:ignore="MissingTranslation">Phone storage %1$s · %2$s free</string>
+    <string name="storage_count_size" tools:ignore="MissingTranslation">%1$,d · %2$s</string>
+    <string name="storage_photos" tools:ignore="MissingTranslation">Photos</string>
+    <string name="storage_videos" tools:ignore="MissingTranslation">Videos</string>
+    <string name="storage_audio" tools:ignore="MissingTranslation">Audio</string>
+    <string name="storage_partial" tools:ignore="MissingTranslation">Limited access: only the photos and videos you picked are counted. Allow all in the app\'s permissions to see everything.</string>
+    <string name="storage_compressed_title" tools:ignore="MissingTranslation">Your compressed copies</string>
+    <string name="storage_folders_title" tools:ignore="MissingTranslation">Biggest folders</string>
+    <string name="storage_biggest_title" tools:ignore="MissingTranslation">Biggest files</string>
+    <string name="storage_compress_videos" tools:ignore="MissingTranslation">Compress these %1$d videos</string>
+    <string name="storage_tap_hint" tools:ignore="MissingTranslation">Tap a file to compress it</string>
     <string name="open_batch_running" tools:ignore="MissingTranslation">Compressing in the background. Tap to see the progress</string>
     <string name="open_batch_finished" tools:ignore="MissingTranslation">Your results are ready. Tap to see them</string>
 

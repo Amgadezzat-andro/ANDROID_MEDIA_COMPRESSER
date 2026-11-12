@@ -78,6 +78,7 @@ class HandleMediaActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AppTheme.apply(this)
         super.onCreate(savedInstanceState)
 
         // recreated by android (app was closed in the background): this screen's batch is gone, starting it

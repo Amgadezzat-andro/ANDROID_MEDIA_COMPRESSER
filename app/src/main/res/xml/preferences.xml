@@ -6,6 +6,14 @@
     <PreferenceCategory
         android:key="prefs_basic"
         android:title="@string/settings_basic_title">
+        <!-- the look of the app, see AppTheme -->
+        <ListPreference
+            android:key="pref_app_theme"
+            android:defaultValue="NOTHING"
+            android:summary="%s"
+            android:title="@string/settings_app_theme"
+            android:entries="@array/settings_app_theme"
+            android:entryValues="@array/settings_app_theme_values" />
         <!-- picking a preset overwrites the advanced options, editing one of them switches to Custom -->
         <ListPreference
             android:key="pref_quality_preset"

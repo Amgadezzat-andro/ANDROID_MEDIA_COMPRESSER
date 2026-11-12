@@ -97,6 +97,14 @@ class Settings(private val context: Context) {
     private val preferences: SharedPreferences
         get() = PreferenceManager.getDefaultSharedPreferences(context)
 
+    // the look of the app, see AppTheme
+    val appTheme: com.caydey.ffshare.AppTheme
+        get() = try {
+            com.caydey.ffshare.AppTheme.valueOf(preferences.getString(APP_THEME, null) ?: com.caydey.ffshare.AppTheme.NOTHING.name)
+        } catch (e: IllegalArgumentException) {
+            com.caydey.ffshare.AppTheme.NOTHING
+        }
+
     var qualityPreset: QualityPreset
         get() = QualityPreset.valueOf(preferences.getString(QUALITY_PRESET, QualityPreset.CUSTOM.name)!!)
         set(value) = setPreference(QUALITY_PRESET, value.name)
@@ -300,6 +308,7 @@ class Settings(private val context: Context) {
         const val KEEP_ORIGINAL_IF_BIGGER = "pref_keep_original_if_bigger"
         const val HARDWARE_VIDEO = "pref_hardware_video"
         const val ONBOARDING_DONE = "onboarding_done"
+        const val APP_THEME = "pref_app_theme"
         const val MEDIA_LOCATION_ASKED = "media_location_asked"
         const val SHOW_ADVANCED_SETTINGS = "pref_show_advanced"
         const val STATS_FILES = "stats_files"

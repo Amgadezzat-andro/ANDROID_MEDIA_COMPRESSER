@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- material you: wallpaper colours on android 12+ (light) -->
+<resources>
+    <color name="android_primary">@android:color/system_accent1_600</color>
+    <color name="android_on_primary">@android:color/system_accent1_0</color>
+    <color name="android_accent">@android:color/system_accent3_600</color>
+    <color name="android_surface">@android:color/system_neutral2_50</color>
+    <color name="android_background">@android:color/system_neutral1_10</color>
+    <color name="android_text">@android:color/system_neutral1_900</color>
+    <color name="android_text_secondary">@android:color/system_neutral2_700</color>
+</resources>

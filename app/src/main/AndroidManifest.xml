@@ -3,6 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!-- the storage tracker: sizes of photos, videos and audio on the phone (also lets adb start test batches) -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
     <!-- keep compressing while the user is in another app or the screen is off -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
@@ -46,6 +51,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.caydey.ffshare.MainActivity" />
         </activity>
+        <activity
+            android:name=".StorageActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FFShare.NoActionBar" />
         <activity
             android:name=".OnboardingActivity"
             android:exported="false"

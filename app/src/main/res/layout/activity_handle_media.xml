@@ -127,7 +127,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
                         android:background="@drawable/details_code_background"
-                        android:fontFamily="@font/space_mono"
+                        android:fontFamily="?attr/nmcMonoFont"
                         android:lineSpacingExtra="2dp"
                         android:padding="12dp"
                         android:textIsSelectable="true"
@@ -161,7 +161,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
-                            android:fontFamily="@font/space_mono"
+                            android:fontFamily="?attr/nmcMonoFont"
                             android:textSize="13sp" />
                     </LinearLayout>
 
@@ -192,8 +192,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
-                            android:fontFamily="@font/space_mono"
-                            android:textColor="@color/mono_accent"
+                            android:fontFamily="?attr/nmcMonoFont"
+                            android:textColor="?attr/colorSecondary"
                             android:textSize="13sp" />
                     </LinearLayout>
 
@@ -216,13 +216,13 @@
                             android:id="@+id/txtProcessedTime"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:fontFamily="@font/space_mono"
+                            android:fontFamily="?attr/nmcMonoFont"
                             android:textSize="13sp" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:fontFamily="@font/space_mono"
+                            android:fontFamily="?attr/nmcMonoFont"
                             android:text=" / "
                             android:textSize="13sp"
                             tools:ignore="HardcodedText" />
@@ -232,7 +232,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:fontFamily="@font/space_mono"
+                            android:fontFamily="?attr/nmcMonoFont"
                             android:textSize="13sp" />
 
                         <TextView
@@ -240,7 +240,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
-                            android:fontFamily="@font/space_mono"
+                            android:fontFamily="?attr/nmcMonoFont"
                             android:textSize="13sp" />
                     </LinearLayout>
                 </LinearLayout>

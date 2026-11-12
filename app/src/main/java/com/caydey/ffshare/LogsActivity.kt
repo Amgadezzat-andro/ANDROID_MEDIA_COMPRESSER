@@ -22,6 +22,7 @@ class LogsActivity : AppCompatActivity() {
     private lateinit var logs: ArrayList<Log>
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AppTheme.apply(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_logs)
 

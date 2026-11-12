@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- what an app theme (Nothing, One UI style, Material You, ...) changes besides colours, see ThemeOverlay.NMC.* -->
+<resources>
+    <attr name="nmcDisplayFont" format="reference|string" />
+    <attr name="nmcLabelFont" format="reference|string" />
+    <attr name="nmcButtonFont" format="reference|string" />
+    <attr name="nmcMonoFont" format="reference|string" />
+    <attr name="nmcLabelCaps" format="boolean" />
+    <attr name="nmcButtonCaps" format="boolean" />
+    <attr name="nmcLabelSpacing" format="float" />
+    <attr name="nmcCardRadius" format="dimension" />
+    <!-- the big "x GB saved" on the savings card -->
+    <attr name="nmcHeroNumber" format="color" />
+    <attr name="nmcButtonRadius" format="dimension" />
+    <attr name="nmcSmallButtonRadius" format="dimension" />
+</resources>

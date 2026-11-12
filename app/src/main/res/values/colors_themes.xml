@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- app theme colours (light), dark versions in values-night/colors_themes.xml -->
+<resources>
+    <color name="oneui_primary">#1B7CF2</color>
+    <color name="oneui_on_primary">#FFFFFF</color>
+    <color name="oneui_accent">#1B7CF2</color>
+    <color name="oneui_surface">#FFFFFF</color>
+    <color name="oneui_background">#F4F4F6</color>
+    <color name="oneui_text">#111111</color>
+    <color name="oneui_text_secondary">#6E6E73</color>
+    <color name="android_primary">#6750A4</color>
+    <color name="android_on_primary">#FFFFFF</color>
+    <color name="android_accent">#7D5260</color>
+    <color name="android_surface">#F3EDF7</color>
+    <color name="android_background">#FEF7FF</color>
+    <color name="android_text">#1D1B20</color>
+    <color name="android_text_secondary">#49454F</color>
+    <color name="midnight_primary">#FFFFFF</color>
+    <color name="midnight_on_primary">#000000</color>
+    <color name="midnight_accent">#00E0A4</color>
+    <color name="midnight_surface">#0E0E0E</color>
+    <color name="midnight_background">#000000</color>
+    <color name="midnight_text">#FFFFFF</color>
+    <color name="midnight_text_secondary">#9A9A9A</color>
+    <color name="classic_primary">#00614E</color>
+    <color name="classic_on_primary">#FFFFFF</color>
+    <color name="classic_accent">#00897B</color>
+    <color name="classic_surface">#FFFFFF</color>
+    <color name="classic_background">#F2F5F4</color>
+    <color name="classic_text">#111111</color>
+    <color name="classic_text_secondary">#5F6B68</color>
+</resources>

@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 
 class PreferencesActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        AppTheme.apply(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_preferences)
 

@@ -46,7 +46,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:visibility="gone"
-                app:strokeColor="@color/mono_accent"
+                app:strokeColor="?attr/colorSecondary"
                 app:strokeWidth="2dp">
 
                 <TextView
@@ -85,7 +85,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
                         android:textAppearance="@style/TextAppearance.FFShare.BigNumber"
-                        android:textColor="@color/mono_accent"
+                        android:textColor="?attr/nmcHeroNumber"
                         android:textSize="36sp" />
 
                     <TextView
@@ -95,6 +95,61 @@
                         android:layout_marginTop="4dp"
                         android:alpha="0.8"
                         android:textColor="?attr/colorOnPrimary"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Storage tracker: what photos, videos and audio take, tap for details -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardStorage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/storage_card_title"
+                            android:textAppearance="@style/TextAppearance.Nothing.Label" />
+
+                        <TextView
+                            android:id="@+id/lblStorageTotal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/TextAppearance.Nothing.Label"
+                            android:textColor="?attr/colorOnSurface" />
+                    </LinearLayout>
+
+                    <!-- photos / videos / audio split, filled in by MainActivity -->
+                    <LinearLayout
+                        android:id="@+id/storageBar"
+                        android:layout_width="match_parent"
+                        android:layout_height="8dp"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/lblStorageSummary"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/storage_card_hint"
                         android:textSize="14sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -294,7 +349,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:layout_marginBottom="8dp"
-        android:fontFamily="@font/space_mono"
+        android:fontFamily="?attr/nmcMonoFont"
         android:letterSpacing="0"
         android:textSize="12sp"
         android:textAllCaps="false"

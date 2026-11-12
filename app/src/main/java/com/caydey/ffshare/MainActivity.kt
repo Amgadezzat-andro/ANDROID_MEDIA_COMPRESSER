@@ -18,7 +18,10 @@ import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
 import com.caydey.ffshare.databinding.ActivityMainBinding
 import com.caydey.ffshare.databinding.ItemPresetCardBinding
+import com.caydey.ffshare.utils.MediaAccess
 import com.caydey.ffshare.utils.SaveFolder
+import com.caydey.ffshare.utils.StorageScanner
+import kotlin.concurrent.thread
 import com.caydey.ffshare.utils.Settings
 import com.caydey.ffshare.utils.Settings.QualityPreset
 import com.caydey.ffshare.utils.Utils
@@ -36,6 +39,8 @@ class MainActivity : AppCompatActivity() {
     private var userSwiping = false
     // true while the photo format buttons are set from code
     private var updatingPhotoFormat = false
+    // the look this screen was built with, changing it in settings rebuilds the screen
+    private var appliedTheme = AppTheme.NOTHING
 
     // the files app, no limit on how many (the photo picker stops at 100). the main button shows only
     // photos and videos, "browse files" adds audio
@@ -52,6 +57,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        appliedTheme = AppTheme.apply(this)
         super.onCreate(savedInstanceState)
 
         // the launcher can start a second copy on top of a restored task, keep only the first
@@ -63,6 +69,11 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
+        // the toolbar overlay picks its own title colour, which is wrong on themes like midnight
+        binding.toolbar.setTitleTextColor(android.util.TypedValue().let { v ->
+            theme.resolveAttribute(android.R.attr.textColor, v, true)
+            if (v.resourceId != 0) getColor(v.resourceId) else v.data
+        })
 
         binding.lblVersion.text = getString(R.string.version, App.versionName)
 
@@ -81,6 +92,8 @@ class MainActivity : AppCompatActivity() {
 
         setUpPresetPager()
 
+        binding.cardStorage.setOnClickListener { startActivity(Intent(this, StorageActivity::class.java)) }
+
         binding.togglePhotoFormat.addOnButtonCheckedListener { _, buttonId, isChecked ->
             if (!isChecked || updatingPhotoFormat) return@addOnButtonCheckedListener
             settings.imageConversionOutput = if (buttonId == R.id.btnFormatWebp) Utils.MediaType.WEBP else Utils.MediaType.UNKNOWN
@@ -96,6 +109,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        if (settings.appTheme != appliedTheme) {
+            recreate()
+            return
+        }
         // settings screen may have switched the preset to custom, setup may have picked one
         if (!settings.isQualityPresetSet) {
             settings.applyQualityPreset(QualityPreset.BALANCED)
@@ -107,6 +124,7 @@ class MainActivity : AppCompatActivity() {
         updateDots(preset.ordinal)
         updatePhotoFormat()
         updateOpenBatch()
+        updateStorage()
         updateSaveFolder()
         updateStats()
     }
@@ -204,6 +222,49 @@ class MainActivity : AppCompatActivity() {
         if (pager.layoutParams.height != tallest) {
             pager.layoutParams = pager.layoutParams.apply { height = tallest }
         }
+    }
+
+    // a quick look at what photos, videos and audio take, the storage screen has the details
+    private fun updateStorage() {
+        if (!MediaAccess.has(this)) {
+            binding.storageBar.visibility = View.GONE
+            binding.lblStorageTotal.text = ""
+            binding.lblStorageSummary.setText(R.string.storage_card_hint)
+            return
+        }
+        val savePath = SaveFolder.displayName(this)
+        thread(name = "storage-card") {
+            val report = StorageScanner(applicationContext).scan(savePath)
+            runOnUiThread {
+                if (isDestroyed) return@runOnUiThread
+                val sizes = StorageScanner.Kind.values().map { report.totals.getValue(it).bytes }
+                binding.lblStorageTotal.text = utils.bytesToHuman(report.mediaBytes)
+                binding.lblStorageSummary.text = getString(R.string.storage_card_summary,
+                    utils.bytesToHuman(sizes[0]), utils.bytesToHuman(sizes[1]), utils.bytesToHuman(sizes[2]))
+                val colors = listOf(com.google.android.material.R.attr.colorPrimary,
+                    com.google.android.material.R.attr.colorSecondary, android.R.attr.textColorSecondary).map { themeColor(it) }
+                binding.storageBar.removeAllViews()
+                binding.storageBar.clipToOutline = true
+                binding.storageBar.background = android.graphics.drawable.GradientDrawable().apply {
+                    cornerRadius = 8 * resources.displayMetrics.density
+                    setColor(themeColor(android.R.attr.textColorSecondary) and 0x22FFFFFF)
+                }
+                val total = sizes.sum().coerceAtLeast(1).toFloat()
+                sizes.forEachIndexed { i, size ->
+                    if (size > 0) binding.storageBar.addView(View(this).apply {
+                        layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, size / total)
+                        setBackgroundColor(colors[i])
+                    })
+                }
+                binding.storageBar.visibility = View.VISIBLE
+            }
+        }
+    }
+
+    private fun themeColor(attr: Int): Int {
+        val value = android.util.TypedValue()
+        theme.resolveAttribute(attr, value, true)
+        return if (value.resourceId != 0) getColor(value.resourceId) else value.data
     }
 
     // the compress screen is hidden from recents, without notifications this is the only way back to it
